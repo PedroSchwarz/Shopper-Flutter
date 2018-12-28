@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-class ProductCreatePage extends StatefulWidget {
-  final Function addProduct;
+class ProductEditPage extends StatefulWidget {
+  final Map<String, dynamic> product;
 
-  ProductCreatePage(this.addProduct);
+  ProductEditPage(this.product);
 
   @override
-  _ProductCreatePageState createState() => _ProductCreatePageState();
+  _ProductEditPageState createState() => _ProductEditPageState();
 }
 
-class _ProductCreatePageState extends State<ProductCreatePage> {
+class _ProductEditPageState extends State<ProductEditPage> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   final Map<String, dynamic> _product = {
     'title': null,
@@ -21,6 +21,7 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
   Widget _buildTitleTextField() {
     return ListTile(
         title: TextFormField(
+            initialValue: widget.product['title'],
             onSaved: (String value) => _product['title'] = value,
             validator: (String value) {
               return value.trim().isEmpty ? 'The title cannot be empty' : null;
@@ -32,6 +33,7 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
   Widget _buildDescTextField() {
     return ListTile(
         title: TextFormField(
+            initialValue: widget.product['description'],
             onSaved: (String value) => _product['description'] = value,
             validator: (String value) {
               return value.trim().isEmpty
@@ -47,6 +49,7 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
   Widget _buildPriceTextField() {
     return ListTile(
         title: TextFormField(
+            initialValue: widget.product['price'].toString(),
             onSaved: (String value) => _product['price'] = double.parse(value),
             validator: (String value) {
               if (value.trim().isEmpty) {
@@ -63,30 +66,31 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
       _product['image'] = 'assets/food.jpg';
-      widget.addProduct(_product);
       Navigator.pushReplacementNamed(context, '/products');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: ListView(
-        children: <Widget>[
-          _buildTitleTextField(),
-          _buildDescTextField(),
-          _buildPriceTextField(),
-          Padding(
-            padding: const EdgeInsets.only(top: 16.0),
-            child: ListTile(
-                title: RaisedButton(
-                    onPressed: _submitForm,
-                    child: Text('SAVE'),
-                    textColor: Colors.white)),
-          )
-        ],
-      ),
-    );
+    return Scaffold(
+        appBar: AppBar(title: Text('Edit ${widget.product['title']}')),
+        body: Form(
+          key: _formKey,
+          child: ListView(
+            children: <Widget>[
+              _buildTitleTextField(),
+              _buildDescTextField(),
+              _buildPriceTextField(),
+              Padding(
+                padding: const EdgeInsets.only(top: 16.0),
+                child: ListTile(
+                    title: RaisedButton(
+                        onPressed: _submitForm,
+                        child: Text('UPDATE'),
+                        textColor: Colors.white)),
+              )
+            ],
+          ),
+        ));
   }
 }

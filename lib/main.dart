@@ -4,6 +4,7 @@ import './pages/auth.dart';
 import './pages/products_admin.dart';
 import './pages/products.dart';
 import './pages/product.dart';
+import './pages/product_edit.dart';
 
 void main() => runApp(MyApp());
 
@@ -41,6 +42,7 @@ class _MyAppState extends State<MyApp> {
           '/': (BuildContext context) => AuthPage(),
           '/products': (BuildContext context) => ProductsPage(_products),
           '/admin': (BuildContext context) => ProductsAdminPage(
+                _products,
                 _addProduct,
                 _deleteProduct,
               ),
@@ -51,13 +53,21 @@ class _MyAppState extends State<MyApp> {
             return null;
           }
           if (pathElements[1] == 'product') {
-            final int index = int.parse(pathElements[2]);
-            return MaterialPageRoute<bool>(
-                builder: (BuildContext context) => ProductPage(
-                    _products[index]['title'],
-                    _products[index]['image'],
-                    _products[index]['description'],
-                    _products[index]['price']));
+            int _index;
+            if (pathElements[2] == 'edit') {
+              _index = int.parse(pathElements[3]);
+              return MaterialPageRoute(
+                  builder: (BuildContext context) =>
+                      ProductEditPage(_products[_index]));
+            } else {
+              _index = int.parse(pathElements[2]);
+              return MaterialPageRoute<bool>(
+                  builder: (BuildContext context) => ProductPage(
+                      _products[_index]['title'],
+                      _products[_index]['image'],
+                      _products[_index]['description'],
+                      _products[_index]['price']));
+            }
           }
           return null;
         },
