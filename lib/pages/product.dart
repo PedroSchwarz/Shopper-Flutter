@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 
 import '../widgets/products/price_tag.dart';
+import '../widgets/ui_elements/title_default.dart';
 
 class ProductPage extends StatelessWidget {
   final String title;
@@ -25,13 +26,8 @@ class ProductPage extends StatelessWidget {
               children: <Widget>[
                 Image.asset(image),
                 Padding(
-                  padding: const EdgeInsets.all(10.0),
-                  child: Text(title,
-                      style: TextStyle(
-                          fontSize: 26.0,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Oswald')),
-                ),
+                    padding: const EdgeInsets.all(10.0),
+                    child: TitleDefault(title)),
                 Padding(
                   padding: const EdgeInsets.symmetric(
                       vertical: 8.0, horizontal: 25.0),
