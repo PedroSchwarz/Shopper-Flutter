@@ -10,18 +10,21 @@ class ProductCreatePage extends StatefulWidget {
 }
 
 class _ProductCreatePageState extends State<ProductCreatePage> {
-  GlobalKey<FormState> formKey = GlobalKey();
-  String _titleCtrl;
-  String _descCtrl;
-  double _priceCtrl;
+  final GlobalKey<FormState> _formKey = GlobalKey();
+  String _title;
+  String _desc;
+  double _price;
 
   Widget _buildTitleTextField() {
     return ListTile(
-        title: TextField(
-            onChanged: (String value) {
+        title: TextFormField(
+            onSaved: (String value) {
               setState(() {
-                _titleCtrl = value;
+                _title = value;
               });
+            },
+            validator: (String value) {
+              return value.trim().isEmpty ? 'The title cannot be empty' : null;
             },
             textCapitalization: TextCapitalization.words,
             decoration: InputDecoration(labelText: 'Title')));
@@ -29,11 +32,16 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
 
   Widget _buildDescTextField() {
     return ListTile(
-        title: TextField(
-            onChanged: (String value) {
+        title: TextFormField(
+            onSaved: (String value) {
               setState(() {
-                _descCtrl = value;
+                _desc = value;
               });
+            },
+            validator: (String value) {
+              return value.trim().isEmpty
+                  ? 'The description cannot be empty'
+                  : null;
             },
             maxLines: 4,
             keyboardType: TextInputType.multiline,
@@ -43,30 +51,41 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
 
   Widget _buildPriceTextField() {
     return ListTile(
-        title: TextField(
-            onChanged: (String value) {
+        title: TextFormField(
+            onSaved: (String value) {
               setState(() {
-                _priceCtrl = double.parse(value);
+                _price = double.parse(value);
               });
+            },
+            validator: (String value) {
+              if (value.trim().isEmpty) {
+                return 'The price cannot be empty';
+              } else if (double.parse(value) < 0) {
+                return 'The price has to be equal or greater than 0';
+              }
             },
             keyboardType: TextInputType.numberWithOptions(decimal: true),
             decoration: InputDecoration(labelText: 'Price')));
   }
 
   void _submitForm() {
-    final Map<String, dynamic> product = {
-      'title': _titleCtrl,
-      'description': _descCtrl,
-      'price': _priceCtrl,
-      'image': 'assets/food.jpg'
-    };
-    widget.addProduct(product);
-    Navigator.pushReplacementNamed(context, '/products');
+    if (_formKey.currentState.validate()) {
+      _formKey.currentState.save();
+      final Map<String, dynamic> product = {
+        'title': _title,
+        'description': _desc,
+        'price': _price,
+        'image': 'assets/food.jpg'
+      };
+      widget.addProduct(product);
+      Navigator.pushReplacementNamed(context, '/products');
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Form(
+      key: _formKey,
       child: ListView(
         children: <Widget>[
           _buildTitleTextField(),
