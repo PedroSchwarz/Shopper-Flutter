@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../models/Product.dart';
+
 class ProductCreatePage extends StatefulWidget {
   final Function addProduct;
 
@@ -63,7 +65,11 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
       _product['image'] = 'assets/food.jpg';
-      widget.addProduct(_product);
+      widget.addProduct(Product(
+          title: _product['title'],
+          description: _product['description'],
+          price: _product['price'],
+          image: _product['image']));
       Navigator.pushReplacementNamed(context, '/products');
     }
   }

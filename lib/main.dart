@@ -6,6 +6,8 @@ import './pages/products.dart';
 import './pages/product.dart';
 import './pages/product_edit.dart';
 
+import './models/Product.dart';
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatefulWidget {
@@ -14,11 +16,17 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  List<Map<String, dynamic>> _products = [];
+  List<Product> _products = [];
 
-  void _addProduct(Map<String, dynamic> product) {
+  void _addProduct(Product product) {
     setState(() {
       _products.add(product);
+    });
+  }
+
+  void _updateProduct(Product product, int index) {
+    setState(() {
+      _products[index] = product;
     });
   }
 
@@ -58,15 +66,15 @@ class _MyAppState extends State<MyApp> {
               _index = int.parse(pathElements[3]);
               return MaterialPageRoute(
                   builder: (BuildContext context) =>
-                      ProductEditPage(_products[_index]));
+                      ProductEditPage(_products[_index], _index, _updateProduct));
             } else {
               _index = int.parse(pathElements[2]);
               return MaterialPageRoute<bool>(
                   builder: (BuildContext context) => ProductPage(
-                      _products[_index]['title'],
-                      _products[_index]['image'],
-                      _products[_index]['description'],
-                      _products[_index]['price']));
+                      _products[_index].title,
+                      _products[_index].image,
+                      _products[_index].description,
+                      _products[_index].price));
             }
           }
           return null;

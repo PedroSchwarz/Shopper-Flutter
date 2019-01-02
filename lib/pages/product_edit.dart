@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 
-class ProductEditPage extends StatefulWidget {
-  final Map<String, dynamic> product;
+import '../models/Product.dart';
 
-  ProductEditPage(this.product);
+class ProductEditPage extends StatefulWidget {
+  final Product product;
+  final int index;
+  final Function updateProduct;
+
+  ProductEditPage(this.product, this.index, this.updateProduct);
 
   @override
   _ProductEditPageState createState() => _ProductEditPageState();
@@ -21,7 +25,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
   Widget _buildTitleTextField() {
     return ListTile(
         title: TextFormField(
-            initialValue: widget.product['title'],
+            initialValue: widget.product.title,
             onSaved: (String value) => _product['title'] = value,
             validator: (String value) {
               return value.trim().isEmpty ? 'The title cannot be empty' : null;
@@ -33,7 +37,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
   Widget _buildDescTextField() {
     return ListTile(
         title: TextFormField(
-            initialValue: widget.product['description'],
+            initialValue: widget.product.description,
             onSaved: (String value) => _product['description'] = value,
             validator: (String value) {
               return value.trim().isEmpty
@@ -49,7 +53,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
   Widget _buildPriceTextField() {
     return ListTile(
         title: TextFormField(
-            initialValue: widget.product['price'].toString(),
+            initialValue: widget.product.price.toString(),
             onSaved: (String value) => _product['price'] = double.parse(value),
             validator: (String value) {
               if (value.trim().isEmpty) {
@@ -62,18 +66,25 @@ class _ProductEditPageState extends State<ProductEditPage> {
             decoration: InputDecoration(labelText: 'Price')));
   }
 
-  void _submitForm() {
+  void _submitForm(BuildContext context) {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
       _product['image'] = 'assets/food.jpg';
-      Navigator.pushReplacementNamed(context, '/products');
+      widget.updateProduct(
+          Product(
+              title: _product['title'],
+              description: _product['description'],
+              price: _product['price'],
+              image: _product['image']),
+          widget.index);
+      Navigator.pop(context);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text('Edit ${widget.product['title']}')),
+        appBar: AppBar(title: Text('Edit ${widget.product.title}')),
         body: Form(
           key: _formKey,
           child: ListView(
@@ -85,7 +96,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
                 padding: const EdgeInsets.only(top: 16.0),
                 child: ListTile(
                     title: RaisedButton(
-                        onPressed: _submitForm,
+                        onPressed: () => _submitForm(context),
                         child: Text('UPDATE'),
                         textColor: Colors.white)),
               )

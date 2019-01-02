@@ -1,29 +1,74 @@
 import 'package:flutter/material.dart';
 
-class ProductListPage extends StatefulWidget {
-  final List<Map<String, dynamic>> products;
+import '../models/Product.dart';
 
-  ProductListPage(this.products);
+class ProductListPage extends StatelessWidget {
+  final List<Product> products;
+  final Function deleteProduct;
 
-  @override
-  _ProductListPageState createState() => _ProductListPageState();
-}
+  ProductListPage(this.products, this.deleteProduct);
 
-class _ProductListPageState extends State<ProductListPage> {
+  void _buildShowAlertDialog(BuildContext context, int index) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+              title: Text('Delete Product'),
+              content: Text('Are you sure?'),
+              actions: <Widget>[
+                FlatButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('CANCEL')),
+                FlatButton(
+                    onPressed: () {
+                      deleteProduct(index);
+                      Navigator.of(context).pop();
+                    },
+                    child: Text('CONFIRM'))
+              ]);
+        });
+  }
+
+  Widget _buildEditButton(BuildContext context, int index) {
+    return IconButton(
+        icon: Icon(Icons.edit),
+        onPressed: () => Navigator.pushNamed(context, '/product/edit/$index'));
+  }
+
+  Widget _buildProductsList() {
+    return products.length > 0
+        ? ListView.builder(
+            itemCount: products.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Dismissible(
+                key: Key(products[index].title),
+                onDismissed: (DismissDirection direction) {
+                  if (direction == DismissDirection.endToStart) {
+                    _buildShowAlertDialog(context, index);
+                  }
+                },
+                background: Container(color: Colors.red),
+                child: Column(
+                  children: <Widget>[
+                    ListTile(
+                        leading: CircleAvatar(
+                            backgroundImage: AssetImage(products[index].image)),
+                        title: Text(products[index].title),
+                        subtitle: Text('\$ ${products[index].price.toString()}',
+                            style: TextStyle(color: Colors.green)),
+                        trailing: _buildEditButton(context, index)),
+                    Divider(height: 2.0)
+                  ],
+                ),
+              );
+            })
+        : Center(child: Text('No products added to your list yet!'));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-        itemCount: widget.products.length,
-        itemBuilder: (BuildContext context, int index) {
-          return ListTile(
-            leading: CircleAvatar(
-                backgroundImage: AssetImage(widget.products[index]['image'])),
-            title: Text(widget.products[index]['title']),
-            trailing: IconButton(
-                icon: Icon(Icons.edit),
-                onPressed: () =>
-                    Navigator.pushNamed(context, '/product/edit/$index')),
-          );
-        });
+    return _buildProductsList();
   }
 }

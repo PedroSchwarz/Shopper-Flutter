@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../widgets/products/products.dart';
 
+import '../models/Product.dart';
+
 class ProductsPage extends StatelessWidget {
   final String title;
-  final List<Map<String, dynamic>> products;
+  final List<Product> products;
 
   ProductsPage(this.products, {this.title = 'Shopper App Flutter'});
 
