@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 import '../models/Product.dart';
+import '../scoped_models/products.dart';
 
 class ProductListPage extends StatelessWidget {
-  final List<Product> products;
-  final Function deleteProduct;
-
-  ProductListPage(this.products, this.deleteProduct);
-
-  void _buildShowAlertDialog(BuildContext context, int index) {
+  void _buildShowAlertDialog(
+      BuildContext context, int index, Function deleteProduct) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -37,7 +35,8 @@ class ProductListPage extends StatelessWidget {
         onPressed: () => Navigator.pushNamed(context, '/product/edit/$index'));
   }
 
-  Widget _buildProductsList() {
+  Widget _buildProductsList(ProductsModel model) {
+    final List<Product> products = model.products;
     return products.length > 0
         ? ListView.builder(
             itemCount: products.length,
@@ -46,7 +45,7 @@ class ProductListPage extends StatelessWidget {
                 key: Key(products[index].title),
                 onDismissed: (DismissDirection direction) {
                   if (direction == DismissDirection.endToStart) {
-                    _buildShowAlertDialog(context, index);
+                    _buildShowAlertDialog(context, index, model.deleteProduct);
                   }
                 },
                 background: Container(color: Colors.red),
@@ -69,6 +68,9 @@ class ProductListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _buildProductsList();
+    return ScopedModelDescendant<ProductsModel>(
+        builder: (BuildContext context, Widget child, ProductsModel model) {
+      return _buildProductsList(model);
+    });
   }
 }

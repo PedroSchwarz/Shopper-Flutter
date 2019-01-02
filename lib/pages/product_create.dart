@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 import '../models/Product.dart';
+import '../scoped_models/products.dart';
 
 class ProductCreatePage extends StatefulWidget {
-  final Function addProduct;
-
-  ProductCreatePage(this.addProduct);
-
   @override
   _ProductCreatePageState createState() => _ProductCreatePageState();
 }
@@ -25,7 +23,9 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
         title: TextFormField(
             onSaved: (String value) => _product['title'] = value,
             validator: (String value) {
-              return value.trim().isEmpty ? 'The title cannot be empty' : null;
+              return value
+                  .trim()
+                  .isEmpty ? 'The title cannot be empty' : null;
             },
             textCapitalization: TextCapitalization.words,
             decoration: InputDecoration(labelText: 'Title')));
@@ -36,7 +36,9 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
         title: TextFormField(
             onSaved: (String value) => _product['description'] = value,
             validator: (String value) {
-              return value.trim().isEmpty
+              return value
+                  .trim()
+                  .isEmpty
                   ? 'The description cannot be empty'
                   : null;
             },
@@ -51,7 +53,9 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
         title: TextFormField(
             onSaved: (String value) => _product['price'] = double.parse(value),
             validator: (String value) {
-              if (value.trim().isEmpty) {
+              if (value
+                  .trim()
+                  .isEmpty) {
                 return 'The price cannot be empty';
               } else if (double.parse(value) < 0) {
                 return 'The price has to be equal or greater than 0';
@@ -61,11 +65,22 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
             decoration: InputDecoration(labelText: 'Price')));
   }
 
-  void _submitForm() {
+  Widget _buildSubmitButton() {
+    return ScopedModelDescendant<ProductsModel>(
+      builder: (BuildContext context, Widget child, ProductsModel model) {
+        return RaisedButton(
+            onPressed: () => _submitForm(model.addProduct),
+            child: Text('SAVE'),
+            textColor: Colors.white);
+      },
+    );
+  }
+
+  void _submitForm(Function addProduct) {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
       _product['image'] = 'assets/food.jpg';
-      widget.addProduct(Product(
+      addProduct(Product(
           title: _product['title'],
           description: _product['description'],
           price: _product['price'],
@@ -86,10 +101,7 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
           Padding(
             padding: const EdgeInsets.only(top: 16.0),
             child: ListTile(
-                title: RaisedButton(
-                    onPressed: _submitForm,
-                    child: Text('SAVE'),
-                    textColor: Colors.white)),
+                title: _buildSubmitButton()),
           )
         ],
       ),

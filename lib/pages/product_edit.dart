@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 import '../models/Product.dart';
+import '../scoped_models/products.dart';
 
 class ProductEditPage extends StatefulWidget {
-  final Product product;
   final int index;
-  final Function updateProduct;
 
-  ProductEditPage(this.product, this.index, this.updateProduct);
+  ProductEditPage(this.index);
 
   @override
   _ProductEditPageState createState() => _ProductEditPageState();
@@ -22,10 +22,10 @@ class _ProductEditPageState extends State<ProductEditPage> {
     'image': null
   };
 
-  Widget _buildTitleTextField() {
+  Widget _buildTitleTextField(String title) {
     return ListTile(
         title: TextFormField(
-            initialValue: widget.product.title,
+            initialValue: title,
             onSaved: (String value) => _product['title'] = value,
             validator: (String value) {
               return value.trim().isEmpty ? 'The title cannot be empty' : null;
@@ -34,10 +34,10 @@ class _ProductEditPageState extends State<ProductEditPage> {
             decoration: InputDecoration(labelText: 'Title')));
   }
 
-  Widget _buildDescTextField() {
+  Widget _buildDescTextField(String description) {
     return ListTile(
         title: TextFormField(
-            initialValue: widget.product.description,
+            initialValue: description,
             onSaved: (String value) => _product['description'] = value,
             validator: (String value) {
               return value.trim().isEmpty
@@ -50,10 +50,10 @@ class _ProductEditPageState extends State<ProductEditPage> {
             decoration: InputDecoration(labelText: 'Description')));
   }
 
-  Widget _buildPriceTextField() {
+  Widget _buildPriceTextField(double price) {
     return ListTile(
         title: TextFormField(
-            initialValue: widget.product.price.toString(),
+            initialValue: price.toString(),
             onSaved: (String value) => _product['price'] = double.parse(value),
             validator: (String value) {
               if (value.trim().isEmpty) {
@@ -66,11 +66,21 @@ class _ProductEditPageState extends State<ProductEditPage> {
             decoration: InputDecoration(labelText: 'Price')));
   }
 
-  void _submitForm(BuildContext context) {
+  Widget _buildSubmitButton(BuildContext context) {
+    return ScopedModelDescendant<ProductsModel>(
+        builder: (BuildContext context, Widget child, ProductsModel model) {
+      return RaisedButton(
+          onPressed: () => _submitForm(context, model.updateProduct),
+          child: Text('UPDATE'),
+          textColor: Colors.white);
+    });
+  }
+
+  void _submitForm(BuildContext context, Function updateProduct) {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
       _product['image'] = 'assets/food.jpg';
-      widget.updateProduct(
+      updateProduct(
           Product(
               title: _product['title'],
               description: _product['description'],
@@ -83,25 +93,25 @@ class _ProductEditPageState extends State<ProductEditPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(title: Text('Edit ${widget.product.title}')),
-        body: Form(
-          key: _formKey,
-          child: ListView(
-            children: <Widget>[
-              _buildTitleTextField(),
-              _buildDescTextField(),
-              _buildPriceTextField(),
-              Padding(
-                padding: const EdgeInsets.only(top: 16.0),
-                child: ListTile(
-                    title: RaisedButton(
-                        onPressed: () => _submitForm(context),
-                        child: Text('UPDATE'),
-                        textColor: Colors.white)),
-              )
-            ],
-          ),
-        ));
+    return ScopedModelDescendant<ProductsModel>(
+        builder: (BuildContext context, Widget child, ProductsModel model) {
+      final Product product = model.products[widget.index];
+      return Scaffold(
+          appBar: AppBar(title: Text('Edit ${product.title}')),
+          body: Form(
+            key: _formKey,
+            child: ListView(
+              children: <Widget>[
+                _buildTitleTextField(product.title),
+                _buildDescTextField(product.description),
+                _buildPriceTextField(product.price),
+                Padding(
+                  padding: const EdgeInsets.only(top: 16.0),
+                  child: ListTile(title: _buildSubmitButton(context)),
+                )
+              ],
+            ),
+          ));
+    });
   }
 }
