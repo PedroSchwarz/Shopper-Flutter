@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:scoped_model/scoped_model.dart';
+
+import '../scoped_models/main.dart';
 
 class AuthPage extends StatefulWidget {
   @override
@@ -7,7 +10,7 @@ class AuthPage extends StatefulWidget {
 
 class _AuthPageState extends State<AuthPage> {
   final GlobalKey<FormState> _formKey = GlobalKey();
-  final Map<String, dynamic> user = {'email': null, 'password': null};
+  final Map<String, dynamic> _user = {'email': null, 'password': null};
 
   DecorationImage _buildBackgroundImage() {
     return DecorationImage(
@@ -20,7 +23,7 @@ class _AuthPageState extends State<AuthPage> {
   Widget _buildEmailTextField() {
     return ListTile(
         title: TextFormField(
-            onSaved: (String value) => user['email'] = value,
+            onSaved: (String value) => _user['email'] = value,
             validator: (String value) {
               if (value.trim().isEmpty) {
                 return 'E-mail cannot be empty';
@@ -42,7 +45,7 @@ class _AuthPageState extends State<AuthPage> {
   Widget _buildPassTextField() {
     return ListTile(
         title: TextFormField(
-            onSaved: (String value) => user['password'] = value,
+            onSaved: (String value) => _user['password'] = value,
             validator: (String value) {
               if (value.trim().isEmpty) {
                 return 'The password cannot be empty';
@@ -59,9 +62,10 @@ class _AuthPageState extends State<AuthPage> {
                 labelText: 'Password')));
   }
 
-  void _submitForm() {
+  void _submitForm(Function login) {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
+      login(_user['email'], _user['password']);
       Navigator.pushReplacementNamed(context, '/products');
     }
   }
@@ -71,25 +75,25 @@ class _AuthPageState extends State<AuthPage> {
     return Scaffold(
         appBar: AppBar(title: Text('Login')),
         body: Container(
-          decoration: BoxDecoration(image: _buildBackgroundImage()),
-          child: Center(
-            child: SingleChildScrollView(
-              child: Form(
-                key: _formKey,
-                child: Column(children: <Widget>[
-                  _buildEmailTextField(),
-                  _buildPassTextField(),
-                  Padding(
-                      padding: const EdgeInsets.only(top: 16.0),
-                      child: ListTile(
-                          title: RaisedButton(
-                              onPressed: _submitForm,
-                              child: Text('LOGIN'),
-                              textColor: Colors.white)))
-                ]),
-              ),
-            ),
-          ),
-        ));
+            decoration: BoxDecoration(image: _buildBackgroundImage()),
+            child: Center(
+                child: SingleChildScrollView(
+                    child: Form(
+                        key: _formKey,
+                        child: Column(children: <Widget>[
+                          _buildEmailTextField(),
+                          _buildPassTextField(),
+                          Padding(
+                              padding: const EdgeInsets.only(top: 16.0),
+                              child: ListTile(title:
+                                  ScopedModelDescendant<MainModel>(builder:
+                                      (BuildContext context, Widget child,
+                                          MainModel model) {
+                                return RaisedButton(
+                                    onPressed: () => _submitForm(model.login),
+                                    child: Text('LOGIN'),
+                                    textColor: Colors.white);
+                              })))
+                        ]))))));
   }
 }

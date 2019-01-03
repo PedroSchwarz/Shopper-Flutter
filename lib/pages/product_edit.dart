@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 import '../models/Product.dart';
-import '../scoped_models/products.dart';
+import '../scoped_models/main.dart';
 
 class ProductEditPage extends StatefulWidget {
   final int index;
@@ -67,8 +67,8 @@ class _ProductEditPageState extends State<ProductEditPage> {
   }
 
   Widget _buildSubmitButton(BuildContext context) {
-    return ScopedModelDescendant<ProductsModel>(
-        builder: (BuildContext context, Widget child, ProductsModel model) {
+    return ScopedModelDescendant<MainModel>(
+        builder: (BuildContext context, Widget child, MainModel model) {
       return RaisedButton(
           onPressed: () => _submitForm(context, model.updateProduct),
           child: Text('UPDATE'),
@@ -80,22 +80,17 @@ class _ProductEditPageState extends State<ProductEditPage> {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
       _product['image'] = 'assets/food.jpg';
-      updateProduct(
-          Product(
-              title: _product['title'],
-              description: _product['description'],
-              price: _product['price'],
-              image: _product['image']),
-          widget.index);
+      updateProduct(_product['title'], _product['description'],
+          _product['price'], _product['image'], widget.index);
       Navigator.pop(context);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return ScopedModelDescendant<ProductsModel>(
-        builder: (BuildContext context, Widget child, ProductsModel model) {
-      final Product product = model.products[widget.index];
+    return ScopedModelDescendant<MainModel>(
+        builder: (BuildContext context, Widget child, MainModel model) {
+      final Product product = model.getProducts[widget.index];
       return Scaffold(
           appBar: AppBar(title: Text('Edit ${product.title}')),
           body: Form(

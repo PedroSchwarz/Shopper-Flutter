@@ -7,8 +7,7 @@ import './pages/products.dart';
 import './pages/product.dart';
 import './pages/product_edit.dart';
 
-import './models/Product.dart';
-import './scoped_models/products.dart';
+import './scoped_models/main.dart';
 
 void main() => runApp(MyApp());
 
@@ -21,8 +20,8 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    return ScopedModel<ProductsModel>(
-      model: ProductsModel(),
+    return ScopedModel<MainModel>(
+      model: MainModel(),
       child: MaterialApp(
           title: 'Shopper App Flutter',
           theme: ThemeData(

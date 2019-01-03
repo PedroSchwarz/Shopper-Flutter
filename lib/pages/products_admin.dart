@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import './product_create.dart';
 import './product_list.dart';
 
-import '../models/Product.dart';
-
 class ProductsAdminPage extends StatelessWidget {
 
   Widget _buildSideDrawer(BuildContext context) {

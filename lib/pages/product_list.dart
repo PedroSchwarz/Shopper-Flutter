@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 
 import '../models/Product.dart';
-import '../scoped_models/products.dart';
+import '../scoped_models/main.dart';
 
 class ProductListPage extends StatelessWidget {
   void _buildShowAlertDialog(
@@ -35,8 +35,8 @@ class ProductListPage extends StatelessWidget {
         onPressed: () => Navigator.pushNamed(context, '/product/edit/$index'));
   }
 
-  Widget _buildProductsList(ProductsModel model) {
-    final List<Product> products = model.products;
+  Widget _buildProductsList(MainModel model) {
+    final List<Product> products = model.getProducts;
     return products.length > 0
         ? ListView.builder(
             itemCount: products.length,
@@ -68,8 +68,8 @@ class ProductListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScopedModelDescendant<ProductsModel>(
-        builder: (BuildContext context, Widget child, ProductsModel model) {
+    return ScopedModelDescendant<MainModel>(
+        builder: (BuildContext context, Widget child, MainModel model) {
       return _buildProductsList(model);
     });
   }

@@ -1,39 +1,29 @@
-import 'package:scoped_model/scoped_model.dart';
-
 import '../models/Product.dart';
+import './connected_products.dart';
 
-class ProductsModel extends Model {
-  List<Product> _products = [];
+mixin ProductsModel on ConnectedProductsModel {
   bool _showFavorites = false;
 
-  List<Product> get products {
-    return List.from(_products);
+  List<Product> get getProducts {
+    return List.from(products);
   }
 
   List<Product> get displayedProducts {
     return _showFavorites
-        ? _products.where((Product product) => product.isFavorite).toList()
-        : List.from(_products);
+        ? products.where((Product product) => product.isFavorite).toList()
+        : List.from(products);
   }
 
   bool get displayFavoritesOnly {
     return _showFavorites;
   }
 
-  void addProduct(Product product) {
-    _products.add(product);
-  }
-
-  void updateProduct(Product product, int index) {
-    _products[index] = product;
-  }
-
   void deleteProduct(int index) {
-    _products.removeAt(index);
+    products.removeAt(index);
   }
 
   void toggleProductFavoriteStatus(int index) {
-    final Product currentProduct = _products[index];
+    final Product currentProduct = products[index];
     final bool currentStatus = currentProduct.isFavorite;
     final bool newFavoriteStatus = !currentStatus;
     final Product updatedProduct = Product(
@@ -41,8 +31,10 @@ class ProductsModel extends Model {
         description: currentProduct.description,
         price: currentProduct.price,
         image: currentProduct.image,
+        userId: currentProduct.userId,
+        userEmail: currentProduct.userEmail,
         isFavorite: newFavoriteStatus);
-    _products[index] = updatedProduct;
+    products[index] = updatedProduct;
     notifyListeners();
   }
 
