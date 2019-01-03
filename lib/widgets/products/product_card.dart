@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:scoped_model/scoped_model.dart';
 
 import './price_tag.dart';
 import '../ui_elements/title_default.dart';
 
 import '../../models/Product.dart';
+import '../../scoped_models/products.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
@@ -24,9 +26,17 @@ class ProductCard extends StatelessWidget {
           icon: Icon(Icons.info_outline, color: Colors.blue, size: 30.0),
           onPressed: () =>
               Navigator.pushNamed<bool>(context, '/product/$index')),
-      IconButton(
-          icon: Icon(Icons.favorite_border, color: Colors.red, size: 30.0),
-          onPressed: () {}),
+      ScopedModelDescendant<ProductsModel>(
+          builder: (BuildContext context, Widget child, ProductsModel model) {
+        return IconButton(
+            icon: Icon(
+                product.isFavorite ? Icons.favorite : Icons.favorite_border,
+                color: Colors.red,
+                size: 30.0),
+            onPressed: () {
+              model.toggleProductFavoriteStatus(index);
+            });
+      })
     ]);
   }
 
