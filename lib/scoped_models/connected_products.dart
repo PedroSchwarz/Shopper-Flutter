@@ -1,4 +1,6 @@
 import 'package:scoped_model/scoped_model.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 import '../models/Product.dart';
 import '../models/User.dart';
@@ -9,6 +11,19 @@ mixin ConnectedProductsModel on Model {
 
   void addProduct(
       String title, String description, double price, String image) {
+    final Map<String, dynamic> productData = {
+      'title': title,
+      'description': description,
+      'price': price,
+      'image':
+          'https://ifoodreal.com/wp-content/uploads/2017/09/FG-cheese-pizza-cauliflower-pizza-crust-recipe.jpg',
+      'userId': _authenticatedUser.id,
+      'userEmail': _authenticatedUser.email,
+      'isFavorite': false
+    };
+    http.post(
+      'https://shopper-flutter-41f06.firebaseio.com/products.json', body: json.encode(productData)
+    );
     final Product newProduct = Product(
         title: title,
         description: description,
