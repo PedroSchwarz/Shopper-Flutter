@@ -4,6 +4,7 @@ import 'dart:convert';
 
 import '../models/Product.dart';
 import '../models/User.dart';
+import '../models/Auth.dart';
 
 mixin ConnectedProductsModel on Model {
   List<Product> _products = [];
@@ -43,7 +44,7 @@ mixin ProductsModel on ConnectedProductsModel {
     };
     try {
       final http.Response res = await http.post(
-          'https://shopper-flutter-41f06.firebaseio.com/products.json',
+          'https://shopper-flutter-41f06.firebaseio.com/products.json?auth=${_authenticatedUser.token}',
           body: json.encode(newData));
       if (res.statusCode != 200 && res.statusCode != 201) {
         _isLoading = false;
@@ -88,7 +89,7 @@ mixin ProductsModel on ConnectedProductsModel {
     };
     try {
       final http.Response res = await http.put(
-          'https://shopper-flutter-41f06.firebaseio.com/products/$id.json',
+          'https://shopper-flutter-41f06.firebaseio.com/products/$id.json?auth=${_authenticatedUser.token}',
           body: json.encode(updatedData));
       _isLoading = false;
       final Product updatedProduct = Product(
@@ -115,7 +116,7 @@ mixin ProductsModel on ConnectedProductsModel {
         _products.indexWhere((product) => product.id == id);
     try {
       final http.Response res = await http.delete(
-          'https://shopper-flutter-41f06.firebaseio.com/products/$id.json');
+          'https://shopper-flutter-41f06.firebaseio.com/products/$id.json?auth=${_authenticatedUser.token}');
       _products.removeAt(deletedProductIndex);
       notifyListeners();
       return true;
@@ -130,8 +131,8 @@ mixin ProductsModel on ConnectedProductsModel {
     _isLoading = true;
     notifyListeners();
     try {
-      final http.Response res = await http
-          .get('https://shopper-flutter-41f06.firebaseio.com/products.json');
+      final http.Response res = await http.get(
+          'https://shopper-flutter-41f06.firebaseio.com/products.json?auth=${_authenticatedUser.token}');
       _isLoading = false;
       final List<Product> products = [];
       final Map<String, dynamic> productsList = json.decode(res.body);
@@ -204,8 +205,53 @@ mixin ProductsModel on ConnectedProductsModel {
 }
 
 mixin UserModel on ConnectedProductsModel {
-  void login(String email, String password) {
-    _authenticatedUser = User(id: 'userUid', email: email, password: password);
+  Future<Map<String, dynamic>> authenticate(String email, String password,
+      [AuthMode mode = AuthMode.Login]) async {
+    _isLoading = true;
+    notifyListeners();
+    final Map<String, dynamic> authData = {
+      'email': email,
+      'password': password,
+      'returnSecureToken': true
+    };
+    http.Response res;
+    if (mode == AuthMode.Login) {
+      res = await http.post(
+          'https://www.googleapis.com/identitytoolkit/v3/relyingparty/verifyPassword?key=AIzaSyDB5wpfMDvWYs5clK-tNc9C2X6Gq1vJBVA',
+          body: json.encode(authData),
+          headers: {'Content-Type': 'application/json'});
+    } else {
+      res = await http.post(
+          'https://www.googleapis.com/identitytoolkit/v3/relyingparty/signupNewUser?key=AIzaSyDB5wpfMDvWYs5clK-tNc9C2X6Gq1vJBVA',
+          body: json.encode(authData),
+          headers: {'Content-Type': 'application/json'});
+    }
+    final Map<String, dynamic> resData = json.decode(res.body);
+    bool hasSucceeded = true;
+    String message = 'Authenticated succeeded.';
+    if (resData.containsKey('error')) {
+      hasSucceeded = false;
+      switch (resData['error']['message']) {
+        case 'EMAIL_EXISTS':
+          message = 'This e-mail already exists.';
+          break;
+        case 'EMAIL_NOT_FOUND':
+          message = 'This e-mail wasn\'t found.';
+          break;
+        case 'INVALID_PASSWORD':
+          message = 'The password is invalid.';
+          break;
+        default:
+          message = 'Something went wrong.';
+          break;
+      }
+    } else {
+      _authenticatedUser =
+          User(id: resData['localId'], email: email, token: resData['idToken']);
+    }
+    _isLoading = false;
+    notifyListeners();
+    return {'success': hasSucceeded, 'message': message};
   }
 }
 

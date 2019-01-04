@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 
-import '../scoped_models/main.dart';
+import '../models/Auth.dart';
 
-enum AuthMode { Signup, Login }
+import '../scoped_models/main.dart';
 
 class AuthPage extends StatefulWidget {
   @override
@@ -71,7 +71,6 @@ class _AuthPageState extends State<AuthPage> {
   Widget _buildPassConfirmTextField() {
     return ListTile(
         title: TextFormField(
-            onSaved: (String value) => _user['email'] = value,
             validator: (String value) {
               if (_passCtrl.text != value) {
                 return 'Passwords must match';
@@ -86,11 +85,27 @@ class _AuthPageState extends State<AuthPage> {
                 labelText: 'Confirm password')));
   }
 
-  void _submitForm(Function login) {
+  void _submitForm(Function authenticate) async {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
-      login(_user['email'], _user['password']);
-      Navigator.pushReplacementNamed(context, '/products');
+      Map<String, dynamic> authInfo =
+          await authenticate(_user['email'], _user['password'], _authMode);
+      if (authInfo['success']) {
+        Navigator.pushReplacementNamed(context, '/products');
+      } else {
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                  title: Text('An Error Occured.'),
+                  content: Text(authInfo['message']),
+                  actions: <Widget>[
+                    FlatButton(
+                        child: Text('OK'),
+                        onPressed: () => Navigator.of(context).pop())
+                  ]);
+            });
+      }
     }
   }
 
@@ -107,7 +122,9 @@ class _AuthPageState extends State<AuthPage> {
                         child: Column(children: <Widget>[
                           _buildEmailTextField(),
                           _buildPassTextField(),
-                          _authMode == AuthMode.Signup ? _buildPassConfirmTextField() : Container(),
+                          _authMode == AuthMode.Signup
+                              ? _buildPassConfirmTextField()
+                              : Container(),
                           ListTile(
                               title: FlatButton(
                                   onPressed: () {
@@ -125,10 +142,15 @@ class _AuthPageState extends State<AuthPage> {
                                   ScopedModelDescendant<MainModel>(builder:
                                       (BuildContext context, Widget child,
                                           MainModel model) {
-                                return RaisedButton(
-                                    onPressed: () => _submitForm(model.login),
-                                    child: Text(_authMode == AuthMode.Login ? 'LOGIN' : 'SIGNUP'),
-                                    textColor: Colors.white);
+                                return model.isLoading
+                                    ? Center(child: CircularProgressIndicator())
+                                    : RaisedButton(
+                                        onPressed: () =>
+                                            _submitForm(model.authenticate),
+                                        child: Text(_authMode == AuthMode.Login
+                                            ? 'LOGIN'
+                                            : 'SIGNUP'),
+                                        textColor: Colors.white);
                               })))
                         ]))))));
   }
