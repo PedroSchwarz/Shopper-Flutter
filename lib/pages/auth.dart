@@ -3,6 +3,8 @@ import 'package:scoped_model/scoped_model.dart';
 
 import '../scoped_models/main.dart';
 
+enum AuthMode { Signup, Login }
+
 class AuthPage extends StatefulWidget {
   @override
   _AuthPageState createState() => _AuthPageState();
@@ -11,6 +13,9 @@ class AuthPage extends StatefulWidget {
 class _AuthPageState extends State<AuthPage> {
   final GlobalKey<FormState> _formKey = GlobalKey();
   final Map<String, dynamic> _user = {'email': null, 'password': null};
+  final TextEditingController _passCtrl = TextEditingController();
+
+  AuthMode _authMode = AuthMode.Login;
 
   DecorationImage _buildBackgroundImage() {
     return DecorationImage(
@@ -45,6 +50,7 @@ class _AuthPageState extends State<AuthPage> {
   Widget _buildPassTextField() {
     return ListTile(
         title: TextFormField(
+            controller: _passCtrl,
             onSaved: (String value) => _user['password'] = value,
             validator: (String value) {
               if (value.trim().isEmpty) {
@@ -60,6 +66,24 @@ class _AuthPageState extends State<AuthPage> {
                 border: OutlineInputBorder(),
                 prefixIcon: Icon(Icons.lock),
                 labelText: 'Password')));
+  }
+
+  Widget _buildPassConfirmTextField() {
+    return ListTile(
+        title: TextFormField(
+            onSaved: (String value) => _user['email'] = value,
+            validator: (String value) {
+              if (_passCtrl.text != value) {
+                return 'Passwords must match';
+              }
+            },
+            obscureText: true,
+            decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.white70,
+                border: OutlineInputBorder(),
+                prefixIcon: Icon(Icons.lock),
+                labelText: 'Confirm password')));
   }
 
   void _submitForm(Function login) {
@@ -83,6 +107,18 @@ class _AuthPageState extends State<AuthPage> {
                         child: Column(children: <Widget>[
                           _buildEmailTextField(),
                           _buildPassTextField(),
+                          _authMode == AuthMode.Signup ? _buildPassConfirmTextField() : Container(),
+                          ListTile(
+                              title: FlatButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _authMode = _authMode == AuthMode.Login
+                                          ? AuthMode.Signup
+                                          : AuthMode.Login;
+                                    });
+                                  },
+                                  child: Text(
+                                      'Switch to ${_authMode == AuthMode.Login ? 'Signup' : 'Login'}'))),
                           Padding(
                               padding: const EdgeInsets.only(top: 16.0),
                               child: ListTile(title:
@@ -91,7 +127,7 @@ class _AuthPageState extends State<AuthPage> {
                                           MainModel model) {
                                 return RaisedButton(
                                     onPressed: () => _submitForm(model.login),
-                                    child: Text('LOGIN'),
+                                    child: Text(_authMode == AuthMode.Login ? 'LOGIN' : 'SIGNUP'),
                                     textColor: Colors.white);
                               })))
                         ]))))));

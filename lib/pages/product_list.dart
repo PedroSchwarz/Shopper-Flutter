@@ -26,7 +26,7 @@ class _ProductListPageState extends State<ProductListPage> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-              title: Text('Delete Product'),
+              title: Text('Delete Product.'),
               content: Text('Are you sure?'),
               actions: <Widget>[
                 FlatButton(

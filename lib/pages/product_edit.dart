@@ -85,7 +85,24 @@ class _ProductEditPageState extends State<ProductEditPage> {
           'https://ifoodreal.com/wp-content/uploads/2017/09/FG-cheese-pizza-cauliflower-pizza-crust-recipe.jpg';
       updateProduct(_product['title'], _product['description'],
               _product['price'], _product['image'], widget.id)
-          .then((_) => Navigator.pop(context));
+          .then((bool success) {
+        if (success) {
+          Navigator.pop(context);
+        } else {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                    title: Text('Something Went Wrong.'),
+                    content: Text('Please try again later.'),
+                    actions: <Widget>[
+                      FlatButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: Text('OK'))
+                    ]);
+              });
+        }
+      });
     }
   }
 

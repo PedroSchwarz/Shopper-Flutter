@@ -77,7 +77,24 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
       _product['image'] = 'assets/food.jpg';
       addProduct(_product['title'], _product['description'], _product['price'],
               _product['image'])
-          .then((_) => Navigator.pushReplacementNamed(context, '/products'));
+          .then((bool success) {
+        if (success) {
+          Navigator.pushReplacementNamed(context, '/products');
+        } else {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                    title: Text('Something Went Wrong.'),
+                    content: Text('Please try again later.'),
+                    actions: <Widget>[
+                      FlatButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: Text('OK'))
+                    ]);
+              });
+        }
+      });
     }
   }
 

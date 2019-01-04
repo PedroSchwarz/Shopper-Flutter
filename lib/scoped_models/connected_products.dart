@@ -9,75 +9,6 @@ mixin ConnectedProductsModel on Model {
   List<Product> _products = [];
   User _authenticatedUser;
   bool _isLoading = false;
-
-  Future<Null> addProduct(
-      String title, String description, double price, String image) {
-    _isLoading = true;
-    notifyListeners();
-    final Map<String, dynamic> newData = {
-      'title': title,
-      'description': description,
-      'price': price,
-      'image':
-          'https://ifoodreal.com/wp-content/uploads/2017/09/FG-cheese-pizza-cauliflower-pizza-crust-recipe.jpg',
-      'userId': _authenticatedUser.id,
-      'userEmail': _authenticatedUser.email,
-      'isFavorite': false
-    };
-    return http
-        .post('https://shopper-flutter-41f06.firebaseio.com/products.json',
-            body: json.encode(newData))
-        .then((http.Response res) {
-      _isLoading = false;
-      final Map<String, dynamic> resData = json.decode(res.body);
-      final Product newProduct = Product(
-          id: resData['name'],
-          title: title,
-          description: description,
-          price: price,
-          image: image,
-          userId: _authenticatedUser.id,
-          userEmail: _authenticatedUser.email);
-      _products.add(newProduct);
-      notifyListeners();
-    });
-  }
-
-  Future<Null> updateProduct(
-      String title, String description, double price, String image, String id) {
-    _isLoading = true;
-    notifyListeners();
-    final Product currentProduct =
-        _products.firstWhere((Product product) => product.id == id);
-    final int currentProductIndex = _products.indexOf(currentProduct);
-    final Map<String, dynamic> updatedData = {
-      'title': title,
-      'description': description,
-      'price': price,
-      'image':
-          'https://ifoodreal.com/wp-content/uploads/2017/09/FG-cheese-pizza-cauliflower-pizza-crust-recipe.jpg',
-      'isFavorite': currentProduct.isFavorite,
-      'userId': currentProduct.userId,
-      'userEmail': currentProduct.userEmail
-    };
-    return http
-        .put('https://shopper-flutter-41f06.firebaseio.com/products/$id.json',
-            body: json.encode(updatedData))
-        .then((http.Response res) {
-      _isLoading = false;
-      final Product updatedProduct = Product(
-          id: currentProduct.id,
-          title: title,
-          description: description,
-          price: price,
-          image: image,
-          isFavorite: currentProduct.isFavorite,
-          userId: currentProduct.userId,
-          userEmail: currentProduct.userEmail);
-      _products[currentProductIndex] = updatedProduct;
-      notifyListeners();
-    });
-  }
 }
 
 mixin ProductsModel on ConnectedProductsModel {
@@ -97,24 +28,110 @@ mixin ProductsModel on ConnectedProductsModel {
     return _showFavorites;
   }
 
-  void deleteProduct(String id) {
-    final int deletedProductIndex =
-        _products.indexWhere((product) => product.id == id);
-    http
-        .delete(
-            'https://shopper-flutter-41f06.firebaseio.com/products/$id.json')
-        .then((http.Response res) {
-      _products.removeAt(deletedProductIndex);
-      notifyListeners();
-    });
-  }
-
-  Future<Null> fetchProducts() {
+  Future<bool> addProduct(
+      String title, String description, double price, String image) async {
     _isLoading = true;
     notifyListeners();
-    return http
-        .get('https://shopper-flutter-41f06.firebaseio.com/products.json')
-        .then((http.Response res) {
+    final Map<String, dynamic> newData = {
+      'title': title,
+      'description': description,
+      'price': price,
+      'image':
+          'https://ifoodreal.com/wp-content/uploads/2017/09/FG-cheese-pizza-cauliflower-pizza-crust-recipe.jpg',
+      'userId': _authenticatedUser.id,
+      'userEmail': _authenticatedUser.email
+    };
+    try {
+      final http.Response res = await http.post(
+          'https://shopper-flutter-41f06.firebaseio.com/products.json',
+          body: json.encode(newData));
+      if (res.statusCode != 200 && res.statusCode != 201) {
+        _isLoading = false;
+        notifyListeners();
+        return false;
+      }
+      _isLoading = false;
+      final Map<String, dynamic> resData = json.decode(res.body);
+      final Product newProduct = Product(
+          id: resData['name'],
+          title: title,
+          description: description,
+          price: price,
+          image: image,
+          userId: _authenticatedUser.id,
+          userEmail: _authenticatedUser.email);
+      _products.add(newProduct);
+      notifyListeners();
+      return true;
+    } catch (error) {
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> updateProduct(String title, String description, double price,
+      String image, String id) async {
+    _isLoading = true;
+    notifyListeners();
+    final Product currentProduct =
+        _products.firstWhere((Product product) => product.id == id);
+    final int currentProductIndex = _products.indexOf(currentProduct);
+    final Map<String, dynamic> updatedData = {
+      'title': title,
+      'description': description,
+      'price': price,
+      'image':
+          'https://ifoodreal.com/wp-content/uploads/2017/09/FG-cheese-pizza-cauliflower-pizza-crust-recipe.jpg',
+      'userId': currentProduct.userId,
+      'userEmail': currentProduct.userEmail
+    };
+    try {
+      final http.Response res = await http.put(
+          'https://shopper-flutter-41f06.firebaseio.com/products/$id.json',
+          body: json.encode(updatedData));
+      _isLoading = false;
+      final Product updatedProduct = Product(
+          id: currentProduct.id,
+          title: title,
+          description: description,
+          price: price,
+          image: image,
+          isFavorite: currentProduct.isFavorite,
+          userId: currentProduct.userId,
+          userEmail: currentProduct.userEmail);
+      _products[currentProductIndex] = updatedProduct;
+      notifyListeners();
+      return true;
+    } catch (error) {
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<bool> deleteProduct(String id) async {
+    final int deletedProductIndex =
+        _products.indexWhere((product) => product.id == id);
+    try {
+      final http.Response res = await http.delete(
+          'https://shopper-flutter-41f06.firebaseio.com/products/$id.json');
+      _products.removeAt(deletedProductIndex);
+      notifyListeners();
+      return true;
+    } catch (error) {
+      _isLoading = false;
+      notifyListeners();
+      return false;
+    }
+  }
+
+  Future<Null> fetchProducts() async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final http.Response res = await http
+          .get('https://shopper-flutter-41f06.firebaseio.com/products.json');
       _isLoading = false;
       final List<Product> products = [];
       final Map<String, dynamic> productsList = json.decode(res.body);
@@ -130,13 +147,16 @@ mixin ProductsModel on ConnectedProductsModel {
             price: productData['price'],
             image: productData['image'],
             userId: productData['userId'],
-            userEmail: productData['userEmail'],
-            isFavorite: productData['isFavorite']);
+            userEmail: productData['userEmail']);
         products.add(product);
       });
       _products = products;
       notifyListeners();
-    });
+    } catch (error) {
+      _isLoading = false;
+      notifyListeners();
+      return;
+    }
   }
 
   Product fetchSingleProduct(String id) {
