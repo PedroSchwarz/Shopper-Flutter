@@ -44,10 +44,12 @@ mixin ConnectedProductsModel on Model {
   }
 
   Future<Null> updateProduct(
-      String title, String description, double price, String image, int index) {
+      String title, String description, double price, String image, String id) {
     _isLoading = true;
     notifyListeners();
-    final Product currentProduct = _products[index];
+    final Product currentProduct =
+        _products.firstWhere((Product product) => product.id == id);
+    final int currentProductIndex = _products.indexOf(currentProduct);
     final Map<String, dynamic> updatedData = {
       'title': title,
       'description': description,
@@ -59,8 +61,7 @@ mixin ConnectedProductsModel on Model {
       'userEmail': currentProduct.userEmail
     };
     return http
-        .put(
-            'https://shopper-flutter-41f06.firebaseio.com/products/${currentProduct.id}.json',
+        .put('https://shopper-flutter-41f06.firebaseio.com/products/$id.json',
             body: json.encode(updatedData))
         .then((http.Response res) {
       _isLoading = false;
@@ -73,7 +74,7 @@ mixin ConnectedProductsModel on Model {
           isFavorite: currentProduct.isFavorite,
           userId: currentProduct.userId,
           userEmail: currentProduct.userEmail);
-      _products[index] = updatedProduct;
+      _products[currentProductIndex] = updatedProduct;
       notifyListeners();
     });
   }
@@ -96,20 +97,22 @@ mixin ProductsModel on ConnectedProductsModel {
     return _showFavorites;
   }
 
-  void deleteProduct(int index) {
+  void deleteProduct(String id) {
+    final int deletedProductIndex =
+        _products.indexWhere((product) => product.id == id);
     http
         .delete(
-            'https://shopper-flutter-41f06.firebaseio.com/products/${_products[index].id}.json')
+            'https://shopper-flutter-41f06.firebaseio.com/products/$id.json')
         .then((http.Response res) {
-      _products.removeAt(index);
+      _products.removeAt(deletedProductIndex);
       notifyListeners();
     });
   }
 
-  void fetchProducts() {
+  Future<Null> fetchProducts() {
     _isLoading = true;
     notifyListeners();
-    http
+    return http
         .get('https://shopper-flutter-41f06.firebaseio.com/products.json')
         .then((http.Response res) {
       _isLoading = false;
@@ -136,8 +139,14 @@ mixin ProductsModel on ConnectedProductsModel {
     });
   }
 
-  void toggleProductFavoriteStatus(int index) {
-    final Product currentProduct = _products[index];
+  Product fetchSingleProduct(String id) {
+    return _products.firstWhere((Product product) => product.id == id);
+  }
+
+  void toggleProductFavoriteStatus(String id) {
+    final Product currentProduct =
+        _products.firstWhere((Product product) => product.id == id);
+    final int currentProductIndex = _products.indexOf(currentProduct);
     final bool currentStatus = currentProduct.isFavorite;
     final bool newFavoriteStatus = !currentStatus;
     final Map<String, dynamic> updatedData = {
@@ -151,7 +160,7 @@ mixin ProductsModel on ConnectedProductsModel {
     };
     http
         .put(
-            'https://shopper-flutter-41f06.firebaseio.com/products/${_products[index].id}.json',
+            'https://shopper-flutter-41f06.firebaseio.com/products/${currentProduct.id}.json',
             body: json.encode(updatedData))
         .then((http.Response res) {
       final Product updatedProduct = Product(
@@ -163,7 +172,7 @@ mixin ProductsModel on ConnectedProductsModel {
           userId: currentProduct.userId,
           userEmail: currentProduct.userEmail,
           isFavorite: newFavoriteStatus);
-      _products[index] = updatedProduct;
+      _products[currentProductIndex] = updatedProduct;
       notifyListeners();
     });
   }

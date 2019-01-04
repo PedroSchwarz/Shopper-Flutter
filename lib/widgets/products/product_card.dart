@@ -9,9 +9,8 @@ import '../../scoped_models/main.dart';
 
 class ProductCard extends StatelessWidget {
   final Product product;
-  final int index;
 
-  ProductCard(this.product, this.index);
+  ProductCard(this.product);
 
   Widget _buildTitlePriceRow() {
     return Row(mainAxisAlignment: MainAxisAlignment.center, children: <Widget>[
@@ -25,7 +24,7 @@ class ProductCard extends StatelessWidget {
       IconButton(
           icon: Icon(Icons.info_outline, color: Colors.blue, size: 30.0),
           onPressed: () =>
-              Navigator.pushNamed<bool>(context, '/product/$index')),
+              Navigator.pushNamed<bool>(context, '/product/${product.id}')),
       ScopedModelDescendant<MainModel>(
           builder: (BuildContext context, Widget child, MainModel model) {
         return IconButton(
@@ -34,7 +33,7 @@ class ProductCard extends StatelessWidget {
                 color: Colors.red,
                 size: 30.0),
             onPressed: () {
-              model.toggleProductFavoriteStatus(index);
+              model.toggleProductFavoriteStatus(product.id);
             });
       })
     ]);
@@ -44,7 +43,10 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
         child: Column(children: <Widget>[
-      Image.network(product.image),
+      FadeInImage(
+          placeholder: AssetImage('assets/food.jpg'),
+          image: NetworkImage(product.image),
+          fit: BoxFit.cover),
       _buildTitlePriceRow(),
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 25.0),

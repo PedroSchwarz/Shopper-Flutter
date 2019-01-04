@@ -40,16 +40,16 @@ class _MyAppState extends State<MyApp> {
             if (pathElements[0] != '') {
               return null;
             }
+            String _id;
             if (pathElements[1] == 'product') {
-              int _index;
               if (pathElements[2] == 'edit') {
-                _index = int.parse(pathElements[3]);
+                _id = pathElements[3];
                 return MaterialPageRoute(
-                    builder: (BuildContext context) => ProductEditPage(_index));
+                    builder: (BuildContext context) => ProductEditPage(_id));
               } else {
-                _index = int.parse(pathElements[2]);
+                _id = pathElements[2];
                 return MaterialPageRoute<bool>(
-                    builder: (BuildContext context) => ProductPage(_index));
+                    builder: (BuildContext context) => ProductPage(_id));
               }
             }
             return null;

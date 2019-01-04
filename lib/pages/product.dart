@@ -9,9 +9,9 @@ import '../models/Product.dart';
 import '../scoped_models/main.dart';
 
 class ProductPage extends StatelessWidget {
-  final int index;
+  final String id;
 
-  ProductPage(this.index);
+  ProductPage(this.id);
 
   Widget _buildAddressPriceRow(double price) {
     return Row(
@@ -27,13 +27,16 @@ class ProductPage extends StatelessWidget {
       return Future.value(false);
     }, child: ScopedModelDescendant<MainModel>(
         builder: (BuildContext context, Widget child, MainModel model) {
-      final Product product = model.getProducts[index];
+      final Product product = model.fetchSingleProduct(id);
       return Scaffold(
           appBar: AppBar(title: Text(product.title)),
           body: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                Image.network(product.image),
+                FadeInImage(
+                    placeholder: AssetImage('assets/food.jpg'),
+                    image: NetworkImage(product.image),
+                    fit: BoxFit.cover),
                 Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: TitleDefault(product.title)),

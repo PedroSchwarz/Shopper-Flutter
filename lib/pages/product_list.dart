@@ -21,7 +21,7 @@ class _ProductListPageState extends State<ProductListPage> {
   }
 
   void _buildShowAlertDialog(
-      BuildContext context, int index, Function deleteProduct) {
+      BuildContext context, String id, Function deleteProduct) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -36,7 +36,7 @@ class _ProductListPageState extends State<ProductListPage> {
                     child: Text('CANCEL')),
                 FlatButton(
                     onPressed: () {
-                      deleteProduct(index);
+                      deleteProduct(id);
                       Navigator.of(context).pop();
                     },
                     child: Text('CONFIRM'))
@@ -44,10 +44,10 @@ class _ProductListPageState extends State<ProductListPage> {
         });
   }
 
-  Widget _buildEditButton(BuildContext context, int index) {
+  Widget _buildEditButton(BuildContext context, String id) {
     return IconButton(
         icon: Icon(Icons.edit),
-        onPressed: () => Navigator.pushNamed(context, '/product/edit/$index'));
+        onPressed: () => Navigator.pushNamed(context, '/product/edit/$id'));
   }
 
   Widget _buildProductsList(MainModel model) {
@@ -60,7 +60,7 @@ class _ProductListPageState extends State<ProductListPage> {
                 key: Key(products[index].id),
                 onDismissed: (DismissDirection direction) {
                   if (direction == DismissDirection.endToStart) {
-                    _buildShowAlertDialog(context, index, model.deleteProduct);
+                    _buildShowAlertDialog(context, products[index].id, model.deleteProduct);
                   }
                 },
                 background: Container(color: Colors.red),
@@ -73,7 +73,8 @@ class _ProductListPageState extends State<ProductListPage> {
                         title: Text(products[index].title),
                         subtitle: Text('\$ ${products[index].price.toString()}',
                             style: TextStyle(color: Colors.green)),
-                        trailing: _buildEditButton(context, index)),
+                        trailing:
+                            _buildEditButton(context, products[index].id)),
                     Divider(height: 2.0)
                   ],
                 ),

@@ -5,9 +5,9 @@ import '../models/Product.dart';
 import '../scoped_models/main.dart';
 
 class ProductEditPage extends StatefulWidget {
-  final int index;
+  final String id;
 
-  ProductEditPage(this.index);
+  ProductEditPage(this.id);
 
   @override
   _ProductEditPageState createState() => _ProductEditPageState();
@@ -81,9 +81,10 @@ class _ProductEditPageState extends State<ProductEditPage> {
   void _submitForm(BuildContext context, Function updateProduct) {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
-      _product['image'] = 'https://ifoodreal.com/wp-content/uploads/2017/09/FG-cheese-pizza-cauliflower-pizza-crust-recipe.jpg';
+      _product['image'] =
+          'https://ifoodreal.com/wp-content/uploads/2017/09/FG-cheese-pizza-cauliflower-pizza-crust-recipe.jpg';
       updateProduct(_product['title'], _product['description'],
-              _product['price'], _product['image'], widget.index)
+              _product['price'], _product['image'], widget.id)
           .then((_) => Navigator.pop(context));
     }
   }
@@ -92,7 +93,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
   Widget build(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
         builder: (BuildContext context, Widget child, MainModel model) {
-      final Product product = model.getProducts[widget.index];
+      final Product product = model.fetchSingleProduct(widget.id);
       return Scaffold(
           appBar: AppBar(title: Text('Edit ${product.title}')),
           body: Form(
