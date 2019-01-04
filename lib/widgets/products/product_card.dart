@@ -44,7 +44,7 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
         child: Column(children: <Widget>[
-      Image.asset(product.image),
+      Image.network(product.image),
       _buildTitlePriceRow(),
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 25.0),

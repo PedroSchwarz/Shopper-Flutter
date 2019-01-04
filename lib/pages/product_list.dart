@@ -4,7 +4,22 @@ import 'package:scoped_model/scoped_model.dart';
 import '../models/Product.dart';
 import '../scoped_models/main.dart';
 
-class ProductListPage extends StatelessWidget {
+class ProductListPage extends StatefulWidget {
+  final MainModel model;
+
+  ProductListPage(this.model);
+
+  @override
+  _ProductListPageState createState() => _ProductListPageState();
+}
+
+class _ProductListPageState extends State<ProductListPage> {
+  @override
+  void initState() {
+    super.initState();
+    widget.model.fetchProducts();
+  }
+
   void _buildShowAlertDialog(
       BuildContext context, int index, Function deleteProduct) {
     showDialog(
@@ -42,7 +57,7 @@ class ProductListPage extends StatelessWidget {
             itemCount: products.length,
             itemBuilder: (BuildContext context, int index) {
               return Dismissible(
-                key: Key(products[index].title),
+                key: Key(products[index].id),
                 onDismissed: (DismissDirection direction) {
                   if (direction == DismissDirection.endToStart) {
                     _buildShowAlertDialog(context, index, model.deleteProduct);
@@ -53,7 +68,8 @@ class ProductListPage extends StatelessWidget {
                   children: <Widget>[
                     ListTile(
                         leading: CircleAvatar(
-                            backgroundImage: AssetImage(products[index].image)),
+                            backgroundImage:
+                                NetworkImage(products[index].image)),
                         title: Text(products[index].title),
                         subtitle: Text('\$ ${products[index].price.toString()}',
                             style: TextStyle(color: Colors.green)),

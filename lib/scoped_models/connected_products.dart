@@ -8,10 +8,13 @@ import '../models/User.dart';
 mixin ConnectedProductsModel on Model {
   List<Product> _products = [];
   User _authenticatedUser;
+  bool _isLoading = false;
 
-  void addProduct(
+  Future<Null> addProduct(
       String title, String description, double price, String image) {
-    final Map<String, dynamic> productData = {
+    _isLoading = true;
+    notifyListeners();
+    final Map<String, dynamic> newData = {
       'title': title,
       'description': description,
       'price': price,
@@ -21,29 +24,58 @@ mixin ConnectedProductsModel on Model {
       'userEmail': _authenticatedUser.email,
       'isFavorite': false
     };
-    http.post(
-      'https://shopper-flutter-41f06.firebaseio.com/products.json', body: json.encode(productData)
-    );
-    final Product newProduct = Product(
-        title: title,
-        description: description,
-        price: price,
-        image: image,
-        userId: _authenticatedUser.id,
-        userEmail: _authenticatedUser.email);
-    _products.add(newProduct);
+    return http
+        .post('https://shopper-flutter-41f06.firebaseio.com/products.json',
+            body: json.encode(newData))
+        .then((http.Response res) {
+      _isLoading = false;
+      final Map<String, dynamic> resData = json.decode(res.body);
+      final Product newProduct = Product(
+          id: resData['name'],
+          title: title,
+          description: description,
+          price: price,
+          image: image,
+          userId: _authenticatedUser.id,
+          userEmail: _authenticatedUser.email);
+      _products.add(newProduct);
+      notifyListeners();
+    });
   }
 
-  void updateProduct(
+  Future<Null> updateProduct(
       String title, String description, double price, String image, int index) {
-    final Product updatedProduct = Product(
-        title: title,
-        description: description,
-        price: price,
-        image: image,
-        userId: _authenticatedUser.id,
-        userEmail: _authenticatedUser.email);
-    _products[index] = updatedProduct;
+    _isLoading = true;
+    notifyListeners();
+    final Product currentProduct = _products[index];
+    final Map<String, dynamic> updatedData = {
+      'title': title,
+      'description': description,
+      'price': price,
+      'image':
+          'https://ifoodreal.com/wp-content/uploads/2017/09/FG-cheese-pizza-cauliflower-pizza-crust-recipe.jpg',
+      'isFavorite': currentProduct.isFavorite,
+      'userId': currentProduct.userId,
+      'userEmail': currentProduct.userEmail
+    };
+    return http
+        .put(
+            'https://shopper-flutter-41f06.firebaseio.com/products/${currentProduct.id}.json',
+            body: json.encode(updatedData))
+        .then((http.Response res) {
+      _isLoading = false;
+      final Product updatedProduct = Product(
+          id: currentProduct.id,
+          title: title,
+          description: description,
+          price: price,
+          image: image,
+          isFavorite: currentProduct.isFavorite,
+          userId: currentProduct.userId,
+          userEmail: currentProduct.userEmail);
+      _products[index] = updatedProduct;
+      notifyListeners();
+    });
   }
 }
 
@@ -65,23 +97,75 @@ mixin ProductsModel on ConnectedProductsModel {
   }
 
   void deleteProduct(int index) {
-    _products.removeAt(index);
+    http
+        .delete(
+            'https://shopper-flutter-41f06.firebaseio.com/products/${_products[index].id}.json')
+        .then((http.Response res) {
+      _products.removeAt(index);
+      notifyListeners();
+    });
+  }
+
+  void fetchProducts() {
+    _isLoading = true;
+    notifyListeners();
+    http
+        .get('https://shopper-flutter-41f06.firebaseio.com/products.json')
+        .then((http.Response res) {
+      _isLoading = false;
+      final List<Product> products = [];
+      final Map<String, dynamic> productsList = json.decode(res.body);
+      if (productsList == null) {
+        notifyListeners();
+        return;
+      }
+      productsList.forEach((String id, dynamic productData) {
+        final Product product = Product(
+            id: id,
+            title: productData['title'],
+            description: productData['description'],
+            price: productData['price'],
+            image: productData['image'],
+            userId: productData['userId'],
+            userEmail: productData['userEmail'],
+            isFavorite: productData['isFavorite']);
+        products.add(product);
+      });
+      _products = products;
+      notifyListeners();
+    });
   }
 
   void toggleProductFavoriteStatus(int index) {
     final Product currentProduct = _products[index];
     final bool currentStatus = currentProduct.isFavorite;
     final bool newFavoriteStatus = !currentStatus;
-    final Product updatedProduct = Product(
-        title: currentProduct.title,
-        description: currentProduct.description,
-        price: currentProduct.price,
-        image: currentProduct.image,
-        userId: currentProduct.userId,
-        userEmail: currentProduct.userEmail,
-        isFavorite: newFavoriteStatus);
-    _products[index] = updatedProduct;
-    notifyListeners();
+    final Map<String, dynamic> updatedData = {
+      'title': currentProduct.title,
+      'description': currentProduct.description,
+      'price': currentProduct.price,
+      'image': currentProduct.image,
+      'userId': currentProduct.userId,
+      'userEmail': currentProduct.userEmail,
+      'isFavorite': newFavoriteStatus
+    };
+    http
+        .put(
+            'https://shopper-flutter-41f06.firebaseio.com/products/${_products[index].id}.json',
+            body: json.encode(updatedData))
+        .then((http.Response res) {
+      final Product updatedProduct = Product(
+          id: currentProduct.id,
+          title: currentProduct.title,
+          description: currentProduct.description,
+          price: currentProduct.price,
+          image: currentProduct.image,
+          userId: currentProduct.userId,
+          userEmail: currentProduct.userEmail,
+          isFavorite: newFavoriteStatus);
+      _products[index] = updatedProduct;
+      notifyListeners();
+    });
   }
 
   void toggleDisplayMode() {
@@ -93,5 +177,11 @@ mixin ProductsModel on ConnectedProductsModel {
 mixin UserModel on ConnectedProductsModel {
   void login(String email, String password) {
     _authenticatedUser = User(id: 'userUid', email: email, password: password);
+  }
+}
+
+mixin UtilityModel on ConnectedProductsModel {
+  bool get isLoading {
+    return _isLoading;
   }
 }

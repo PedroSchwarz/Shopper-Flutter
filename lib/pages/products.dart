@@ -5,10 +5,22 @@ import '../widgets/products/products.dart';
 
 import '../scoped_models/main.dart';
 
-class ProductsPage extends StatelessWidget {
+class ProductsPage extends StatefulWidget {
   final String title;
+  final MainModel model;
 
-  ProductsPage({this.title = 'Shopper App Flutter'});
+  ProductsPage(this.model, {this.title = 'Shopper App Flutter'});
+
+  @override
+  _ProductsPageState createState() => _ProductsPageState();
+}
+
+class _ProductsPageState extends State<ProductsPage> {
+  @override
+  void initState() {
+    super.initState();
+    widget.model.fetchProducts();
+  }
 
   Widget _buildSideDrawer(BuildContext context) {
     return Drawer(
@@ -23,12 +35,25 @@ class ProductsPage extends StatelessWidget {
     ]));
   }
 
+  Widget _buildProductsList() {
+    return ScopedModelDescendant<MainModel>(
+        builder: (BuildContext context, Widget child, MainModel model) {
+      Widget content = Center(child: Text('No Products Found!'));
+      if (model.displayedProducts.length > 0 && !model.isLoading) {
+        content = Products();
+      } else if (model.isLoading) {
+        content = Center(child: CircularProgressIndicator());
+      }
+      return content;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text(title), actions: <Widget>[
-          ScopedModelDescendant<MainModel>(builder:
-              (BuildContext context, Widget child, MainModel model) {
+        appBar: AppBar(title: Text(widget.title), actions: <Widget>[
+          ScopedModelDescendant<MainModel>(
+              builder: (BuildContext context, Widget child, MainModel model) {
             return IconButton(
                 icon: Icon(model.displayFavoritesOnly
                     ? Icons.favorite
@@ -39,6 +64,6 @@ class ProductsPage extends StatelessWidget {
           })
         ]),
         drawer: _buildSideDrawer(context),
-        body: Products());
+        body: _buildProductsList());
   }
 }

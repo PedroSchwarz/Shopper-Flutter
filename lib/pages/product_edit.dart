@@ -69,20 +69,22 @@ class _ProductEditPageState extends State<ProductEditPage> {
   Widget _buildSubmitButton(BuildContext context) {
     return ScopedModelDescendant<MainModel>(
         builder: (BuildContext context, Widget child, MainModel model) {
-      return RaisedButton(
-          onPressed: () => _submitForm(context, model.updateProduct),
-          child: Text('UPDATE'),
-          textColor: Colors.white);
+      return model.isLoading
+          ? Center(child: CircularProgressIndicator())
+          : RaisedButton(
+              onPressed: () => _submitForm(context, model.updateProduct),
+              child: Text('UPDATE'),
+              textColor: Colors.white);
     });
   }
 
   void _submitForm(BuildContext context, Function updateProduct) {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
-      _product['image'] = 'assets/food.jpg';
+      _product['image'] = 'https://ifoodreal.com/wp-content/uploads/2017/09/FG-cheese-pizza-cauliflower-pizza-crust-recipe.jpg';
       updateProduct(_product['title'], _product['description'],
-          _product['price'], _product['image'], widget.index);
-      Navigator.pop(context);
+              _product['price'], _product['image'], widget.index)
+          .then((_) => Navigator.pop(context));
     }
   }
 

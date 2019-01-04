@@ -61,13 +61,14 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
 
   Widget _buildSubmitButton() {
     return ScopedModelDescendant<MainModel>(
-      builder: (BuildContext context, Widget child, MainModel model) {
-        return RaisedButton(
-            onPressed: () => _submitForm(model.addProduct),
-            child: Text('SAVE'),
-            textColor: Colors.white);
-      },
-    );
+        builder: (BuildContext context, Widget child, MainModel model) {
+      return model.isLoading
+          ? Center(child: CircularProgressIndicator())
+          : RaisedButton(
+              onPressed: () => _submitForm(model.addProduct),
+              child: Text('SAVE'),
+              textColor: Colors.white);
+    });
   }
 
   void _submitForm(Function addProduct) {
@@ -75,8 +76,8 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
       _formKey.currentState.save();
       _product['image'] = 'assets/food.jpg';
       addProduct(_product['title'], _product['description'], _product['price'],
-          _product['image']);
-      Navigator.pushReplacementNamed(context, '/products');
+              _product['image'])
+          .then((_) => Navigator.pushReplacementNamed(context, '/products'));
     }
   }
 

@@ -33,7 +33,7 @@ class ProductPage extends StatelessWidget {
           body: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: <Widget>[
-                Image.asset(product.image),
+                Image.network(product.image),
                 Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: TitleDefault(product.title)),
