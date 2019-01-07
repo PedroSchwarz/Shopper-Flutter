@@ -79,7 +79,7 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
               _product['image'])
           .then((bool success) {
         if (success) {
-          Navigator.pushReplacementNamed(context, '/products');
+          Navigator.pushReplacementNamed(context, '/');
         } else {
           showDialog(
               context: context,

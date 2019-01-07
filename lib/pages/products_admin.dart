@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import './product_create.dart';
 import './product_list.dart';
 
+import '../widgets/ui_elements/logout_list_tile.dart';
+
 import '../scoped_models/main.dart';
 
 class ProductsAdminPage extends StatelessWidget {
@@ -18,8 +20,10 @@ class ProductsAdminPage extends StatelessWidget {
           leading: Icon(Icons.shop),
           title: Text('All Products'),
           onTap: () {
-            Navigator.pushReplacementNamed(context, '/products');
-          })
+            Navigator.pushReplacementNamed(context, '/');
+          }),
+      Divider(height: 2.0),
+      LogoutListTile()
     ]));
   }
 
