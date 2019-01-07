@@ -131,7 +131,7 @@ mixin ProductsModel on ConnectedProductsModel {
     }
   }
 
-  Future<Null> fetchProducts() async {
+  Future<Null> fetchProducts({onlyForUser: false}) async {
     _isLoading = true;
     notifyListeners();
     try {
@@ -152,10 +152,18 @@ mixin ProductsModel on ConnectedProductsModel {
             price: productData['price'],
             image: productData['image'],
             userId: productData['userId'],
-            userEmail: productData['userEmail']);
+            userEmail: productData['userEmail'],
+            isFavorite: productData['wishlistUsers'] == null
+                ? false
+                : (productData['wishlistUsers'] as Map<String, dynamic>)
+                    .containsKey(_authenticatedUser.id));
         products.add(product);
       });
-      _products = products;
+      _products = onlyForUser
+          ? products
+              .where((product) => product.id == _authenticatedUser.id)
+              .toList()
+          : products;
       notifyListeners();
     } catch (error) {
       _isLoading = false;
@@ -168,26 +176,33 @@ mixin ProductsModel on ConnectedProductsModel {
     return _products.firstWhere((Product product) => product.id == id);
   }
 
-  void toggleProductFavoriteStatus(String id) {
+  void toggleProductFavoriteStatus(String id) async {
     final Product currentProduct =
         _products.firstWhere((Product product) => product.id == id);
     final int currentProductIndex = _products.indexOf(currentProduct);
     final bool currentStatus = currentProduct.isFavorite;
     final bool newFavoriteStatus = !currentStatus;
-    final Map<String, dynamic> updatedData = {
-      'title': currentProduct.title,
-      'description': currentProduct.description,
-      'price': currentProduct.price,
-      'image': currentProduct.image,
-      'userId': currentProduct.userId,
-      'userEmail': currentProduct.userEmail,
-      'isFavorite': newFavoriteStatus
-    };
-    http
-        .put(
-            'https://shopper-flutter-41f06.firebaseio.com/products/${currentProduct.id}.json',
-            body: json.encode(updatedData))
-        .then((http.Response res) {
+    final Product updatedProduct = Product(
+        id: currentProduct.id,
+        title: currentProduct.title,
+        description: currentProduct.description,
+        price: currentProduct.price,
+        image: currentProduct.image,
+        userId: currentProduct.userId,
+        userEmail: currentProduct.userEmail,
+        isFavorite: newFavoriteStatus);
+    _products[currentProductIndex] = updatedProduct;
+    notifyListeners();
+    http.Response res;
+    if (newFavoriteStatus) {
+      res = await http.put(
+          'https://shopper-flutter-41f06.firebaseio.com/products/$id/wishlistUsers/${_authenticatedUser.id}.json?auth=${_authenticatedUser.token}',
+          body: json.encode(true));
+    } else {
+      res = await http.delete(
+          'https://shopper-flutter-41f06.firebaseio.com/products/$id/wishlistUsers/${_authenticatedUser.id}.json?auth=${_authenticatedUser.token}');
+    }
+    if (res.statusCode != 200 && res.statusCode != 201) {
       final Product updatedProduct = Product(
           id: currentProduct.id,
           title: currentProduct.title,
@@ -196,10 +211,10 @@ mixin ProductsModel on ConnectedProductsModel {
           image: currentProduct.image,
           userId: currentProduct.userId,
           userEmail: currentProduct.userEmail,
-          isFavorite: newFavoriteStatus);
+          isFavorite: currentStatus);
       _products[currentProductIndex] = updatedProduct;
       notifyListeners();
-    });
+    }
   }
 
   void toggleDisplayMode() {
