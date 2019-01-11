@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 
+import '../widgets/form_inputs/location.dart';
+
 import '../models/Product.dart';
+import '../models/LocationData.dart';
 import '../scoped_models/main.dart';
 
 class ProductEditPage extends StatefulWidget {
@@ -120,6 +123,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
                 _buildTitleTextField(product.title),
                 _buildDescTextField(product.description),
                 _buildPriceTextField(product.price),
+//          LocationInput(_setLocation, product),
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0),
                   child: ListTile(title: _buildSubmitButton(context)),

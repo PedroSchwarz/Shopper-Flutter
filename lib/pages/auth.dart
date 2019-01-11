@@ -126,7 +126,7 @@ class _AuthPageState extends State<AuthPage> {
                               ? _buildPassConfirmTextField()
                               : Container(),
                           ListTile(
-                              title: FlatButton(
+                              title: RaisedButton(
                                   onPressed: () {
                                     setState(() {
                                       _authMode = _authMode == AuthMode.Login
@@ -134,24 +134,23 @@ class _AuthPageState extends State<AuthPage> {
                                           : AuthMode.Login;
                                     });
                                   },
+                                  color: Colors.white,
+                                  textColor: Theme.of(context).accentColor,
                                   child: Text(
                                       'Switch to ${_authMode == AuthMode.Login ? 'Signup' : 'Login'}'))),
-                          Padding(
-                              padding: const EdgeInsets.only(top: 16.0),
-                              child: ListTile(title:
-                                  ScopedModelDescendant<MainModel>(builder:
-                                      (BuildContext context, Widget child,
-                                          MainModel model) {
-                                return model.isLoading
-                                    ? Center(child: CircularProgressIndicator())
-                                    : RaisedButton(
-                                        onPressed: () =>
-                                            _submitForm(model.authenticate),
-                                        child: Text(_authMode == AuthMode.Login
-                                            ? 'LOGIN'
-                                            : 'SIGNUP'),
-                                        textColor: Colors.white);
-                              })))
+                          ListTile(title: ScopedModelDescendant<MainModel>(
+                              builder: (BuildContext context, Widget child,
+                                  MainModel model) {
+                            return model.isLoading
+                                ? Center(child: CircularProgressIndicator())
+                                : RaisedButton(
+                                    onPressed: () =>
+                                        _submitForm(model.authenticate),
+                                    child: Text(_authMode == AuthMode.Login
+                                        ? 'LOGIN'
+                                        : 'SIGN UP'),
+                                    textColor: Colors.white);
+                          }))
                         ]))))));
   }
 }

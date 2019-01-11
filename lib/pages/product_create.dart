@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 
-import '../models/Product.dart';
+import '../widgets/form_inputs/location.dart';
+import '../widgets/form_inputs/image.dart';
+
+import '../models/LocationData.dart';
+
 import '../scoped_models/main.dart';
 
 class ProductCreatePage extends StatefulWidget {
@@ -71,12 +75,18 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
     });
   }
 
+//  void _setLocation(LocationData location) {
+//    _product['location'] = location;
+//  }
+
   void _submitForm(Function addProduct) {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
       _product['image'] = 'assets/food.jpg';
       addProduct(_product['title'], _product['description'], _product['price'],
               _product['image'])
+//      addProduct(_product['title'], _product['description'], _product['price'],
+//          _product['image'], _product['location'])
           .then((bool success) {
         if (success) {
           Navigator.pushReplacementNamed(context, '/');
@@ -101,18 +111,14 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
   @override
   Widget build(BuildContext context) {
     return Form(
-      key: _formKey,
-      child: ListView(
-        children: <Widget>[
+        key: _formKey,
+        child: ListView(children: <Widget>[
           _buildTitleTextField(),
           _buildDescTextField(),
           _buildPriceTextField(),
-          Padding(
-            padding: const EdgeInsets.only(top: 16.0),
-            child: ListTile(title: _buildSubmitButton()),
-          )
-        ],
-      ),
-    );
+//          LocationInput(_setLocation),
+          ImageInput(),
+          ListTile(title: _buildSubmitButton())
+        ]));
   }
 }

@@ -9,6 +9,7 @@ import 'package:rxdart/subjects.dart';
 import '../models/Product.dart';
 import '../models/User.dart';
 import '../models/Auth.dart';
+import '../models/LocationData.dart';
 
 mixin ConnectedProductsModel on Model {
   List<Product> _products = [];
@@ -161,7 +162,7 @@ mixin ProductsModel on ConnectedProductsModel {
       });
       _products = onlyForUser
           ? products
-              .where((product) => product.id == _authenticatedUser.id)
+              .where((product) => product.userId == _authenticatedUser.id)
               .toList()
           : products;
       notifyListeners();
