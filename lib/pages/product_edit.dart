@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+
 import 'package:scoped_model/scoped_model.dart';
 
 import '../widgets/form_inputs/location.dart';
+import '../widgets/form_inputs/image.dart';
 
 import '../models/Product.dart';
 import '../models/LocationData.dart';
@@ -81,11 +84,13 @@ class _ProductEditPageState extends State<ProductEditPage> {
     });
   }
 
+  void _setImage(File image) {
+    _product['image'] = image;
+  }
+
   void _submitForm(BuildContext context, Function updateProduct) {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
-      _product['image'] =
-          'https://ifoodreal.com/wp-content/uploads/2017/09/FG-cheese-pizza-cauliflower-pizza-crust-recipe.jpg';
       updateProduct(_product['title'], _product['description'],
               _product['price'], _product['image'], widget.id)
           .then((bool success) {
@@ -124,6 +129,7 @@ class _ProductEditPageState extends State<ProductEditPage> {
                 _buildDescTextField(product.description),
                 _buildPriceTextField(product.price),
 //          LocationInput(_setLocation, product),
+                ImageInput(_setImage, product: product),
                 Padding(
                   padding: const EdgeInsets.only(top: 16.0),
                   child: ListTile(title: _buildSubmitButton(context)),

@@ -1,10 +1,13 @@
 import 'dart:convert';
 import 'dart:async';
+import 'dart:io';
+import 'package:http_parser/http_parser.dart';
 
 import 'package:scoped_model/scoped_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:rxdart/subjects.dart';
+import 'package:mime/mime.dart';
 
 import '../models/Product.dart';
 import '../models/User.dart';
@@ -34,16 +37,49 @@ mixin ProductsModel on ConnectedProductsModel {
     return _showFavorites;
   }
 
+  Future<Map<String, dynamic>> uploadImage(File image,
+      {String imagePath}) async {
+    final mimeTypeData = lookupMimeType(image.path).split('/');
+    final imageUploadRequest = http.MultipartRequest(
+        'POST',
+        Uri.parse(
+            'https://us-central1-shopper-flutter-41f06.cloudfunctions.net/storeImage'));
+    final file = await http.MultipartFile.fromPath('image', image.path,
+        contentType: MediaType(mimeTypeData[0], mimeTypeData[1]));
+    imageUploadRequest.files.add(file);
+    if (imagePath != null) {
+      imageUploadRequest.fields['imagePath'] = Uri.encodeComponent(imagePath);
+    }
+    imageUploadRequest.headers['authorization'] =
+        'Bearer ${_authenticatedUser.token}';
+
+    try {
+      final streamRes = await imageUploadRequest.send();
+      final res = await http.Response.fromStream(streamRes);
+      if (res.statusCode != 200 && res.statusCode != 201) {
+        return null;
+      }
+      final resData = json.decode(res.body);
+      return resData;
+    } catch (error) {
+      return null;
+    }
+  }
+
   Future<bool> addProduct(
-      String title, String description, double price, String image) async {
+      String title, String description, double price, File image) async {
     _isLoading = true;
     notifyListeners();
+    final uploadData = await uploadImage(image);
+    if (uploadData == null) {
+      return false;
+    }
     final Map<String, dynamic> newData = {
       'title': title,
       'description': description,
       'price': price,
-      'image':
-          'https://ifoodreal.com/wp-content/uploads/2017/09/FG-cheese-pizza-cauliflower-pizza-crust-recipe.jpg',
+      'imageUrl': uploadData['imageUrl'],
+      'imagePath': uploadData['imagePath'],
       'userId': _authenticatedUser.id,
       'userEmail': _authenticatedUser.email
     };
@@ -63,7 +99,8 @@ mixin ProductsModel on ConnectedProductsModel {
           title: title,
           description: description,
           price: price,
-          image: image,
+          imageUrl: uploadData['imageUrl'],
+          imagePath: uploadData['imagePath'],
           userId: _authenticatedUser.id,
           userEmail: _authenticatedUser.email);
       _products.add(newProduct);
@@ -77,18 +114,28 @@ mixin ProductsModel on ConnectedProductsModel {
   }
 
   Future<bool> updateProduct(String title, String description, double price,
-      String image, String id) async {
+      File image, String id) async {
     _isLoading = true;
     notifyListeners();
     final Product currentProduct =
         _products.firstWhere((Product product) => product.id == id);
     final int currentProductIndex = _products.indexOf(currentProduct);
+    String imageUrl = currentProduct.imageUrl;
+    String imagePath = currentProduct.imagePath;
+    if (image != null) {
+      final uploadData = await uploadImage(image);
+      if (uploadData == null) {
+        return false;
+      }
+      imageUrl = uploadData['imageUrl'];
+      imagePath = uploadData['imagePath'];
+    }
     final Map<String, dynamic> updatedData = {
       'title': title,
       'description': description,
       'price': price,
-      'image':
-          'https://ifoodreal.com/wp-content/uploads/2017/09/FG-cheese-pizza-cauliflower-pizza-crust-recipe.jpg',
+      'imageUrl': imageUrl,
+      'imagePath': imagePath,
       'userId': currentProduct.userId,
       'userEmail': currentProduct.userEmail
     };
@@ -102,7 +149,8 @@ mixin ProductsModel on ConnectedProductsModel {
           title: title,
           description: description,
           price: price,
-          image: image,
+          imageUrl: imageUrl,
+          imagePath: imagePath,
           isFavorite: currentProduct.isFavorite,
           userId: currentProduct.userId,
           userEmail: currentProduct.userEmail);
@@ -151,7 +199,8 @@ mixin ProductsModel on ConnectedProductsModel {
             title: productData['title'],
             description: productData['description'],
             price: productData['price'],
-            image: productData['image'],
+            imageUrl: productData['imageUrl'],
+            imagePath: productData['imagePath'],
             userId: productData['userId'],
             userEmail: productData['userEmail'],
             isFavorite: productData['wishlistUsers'] == null
@@ -188,7 +237,8 @@ mixin ProductsModel on ConnectedProductsModel {
         title: currentProduct.title,
         description: currentProduct.description,
         price: currentProduct.price,
-        image: currentProduct.image,
+        imageUrl: currentProduct.imageUrl,
+        imagePath: currentProduct.imagePath,
         userId: currentProduct.userId,
         userEmail: currentProduct.userEmail,
         isFavorite: newFavoriteStatus);
@@ -209,7 +259,8 @@ mixin ProductsModel on ConnectedProductsModel {
           title: currentProduct.title,
           description: currentProduct.description,
           price: currentProduct.price,
-          image: currentProduct.image,
+          imageUrl: currentProduct.imageUrl,
+          imagePath: currentProduct.imagePath,
           userId: currentProduct.userId,
           userEmail: currentProduct.userEmail,
           isFavorite: currentStatus);

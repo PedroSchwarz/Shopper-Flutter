@@ -45,8 +45,10 @@ class ProductCard extends StatelessWidget {
         child: Column(children: <Widget>[
       FadeInImage(
           placeholder: AssetImage('assets/food.jpg'),
-          image: NetworkImage(product.image),
-          fit: BoxFit.cover),
+          image: NetworkImage(product.imageUrl),
+          fit: BoxFit.cover,
+          height: 300,
+          width: MediaQuery.of(context).size.width),
       _buildTitlePriceRow(),
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 25.0),

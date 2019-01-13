@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'dart:io';
+
 import 'package:scoped_model/scoped_model.dart';
 
 import '../widgets/form_inputs/location.dart';
@@ -79,10 +81,13 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
 //    _product['location'] = location;
 //  }
 
+  void _setImage(File image) {
+    _product['image'] = image;
+  }
+
   void _submitForm(Function addProduct) {
-    if (_formKey.currentState.validate()) {
+    if (_formKey.currentState.validate() && _product['image'] != null) {
       _formKey.currentState.save();
-      _product['image'] = 'assets/food.jpg';
       addProduct(_product['title'], _product['description'], _product['price'],
               _product['image'])
 //      addProduct(_product['title'], _product['description'], _product['price'],
@@ -117,7 +122,7 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
           _buildDescTextField(),
           _buildPriceTextField(),
 //          LocationInput(_setLocation),
-          ImageInput(),
+          ImageInput(_setImage),
           ListTile(title: _buildSubmitButton())
         ]));
   }

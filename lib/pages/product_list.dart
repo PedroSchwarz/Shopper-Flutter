@@ -69,7 +69,7 @@ class _ProductListPageState extends State<ProductListPage> {
                     ListTile(
                         leading: CircleAvatar(
                             backgroundImage:
-                                NetworkImage(products[index].image)),
+                                NetworkImage(products[index].imageUrl)),
                         title: Text(products[index].title),
                         subtitle: Text('\$ ${products[index].price.toString()}',
                             style: TextStyle(color: Colors.green)),

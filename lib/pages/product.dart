@@ -30,12 +30,13 @@ class ProductPage extends StatelessWidget {
       final Product product = model.fetchSingleProduct(id);
       return Scaffold(
           appBar: AppBar(title: Text(product.title)),
-          body: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: <Widget>[
+          body: SingleChildScrollView(
+              child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
                 FadeInImage(
                     placeholder: AssetImage('assets/food.jpg'),
-                    image: NetworkImage(product.image),
+                    image: NetworkImage(product.imageUrl),
                     fit: BoxFit.cover),
                 Padding(
                     padding: const EdgeInsets.all(10.0),
@@ -47,13 +48,12 @@ class ProductPage extends StatelessWidget {
                 ),
                 _buildAddressPriceRow(product.price),
                 Padding(
-                  padding: const EdgeInsets.symmetric(
-                      vertical: 16.0, horizontal: 16.0),
-                  child: Text(product.description,
-                      style: TextStyle(
-                          fontSize: 18.0, fontWeight: FontWeight.bold)),
-                )
-              ]));
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 16.0, horizontal: 16.0),
+                    child: Text(product.description,
+                        style: TextStyle(
+                            fontSize: 18.0, fontWeight: FontWeight.bold)))
+              ])));
     }));
   }
 }

@@ -3,14 +3,27 @@ import 'dart:io';
 
 import 'package:image_picker/image_picker.dart';
 
+import '../../models/Product.dart';
+
 class ImageInput extends StatefulWidget {
+  final Function setImage;
+  final Product product;
+
+  ImageInput(this.setImage, {this.product});
+
   @override
   _ImageInputState createState() => _ImageInputState();
 }
 
 class _ImageInputState extends State<ImageInput> {
+  File _imageFile;
+
   void _getImage(BuildContext context, ImageSource source) {
     ImagePicker.pickImage(source: source, maxWidth: 400.0).then((File image) {
+      setState(() {
+        _imageFile = image;
+      });
+      widget.setImage(image);
       Navigator.pop(context);
     });
   }
@@ -45,6 +58,20 @@ class _ImageInputState extends State<ImageInput> {
   @override
   Widget build(BuildContext context) {
     final accentColor = Theme.of(context).accentColor;
+    Widget previewImage = Text('Please select an image.');
+    if (_imageFile != null) {
+      previewImage = Image.file(_imageFile,
+          fit: BoxFit.cover,
+          height: 300.0,
+          width: MediaQuery.of(context).size.width,
+          alignment: Alignment.center);
+    } else if (widget.product != null) {
+      previewImage = Image.network(widget.product.imageUrl,
+          fit: BoxFit.cover,
+          height: 300.0,
+          width: MediaQuery.of(context).size.width,
+          alignment: Alignment.center);
+    }
     return Column(children: <Widget>[
       Padding(
         padding: const EdgeInsets.only(top: 8.0),
@@ -63,7 +90,10 @@ class _ImageInputState extends State<ImageInput> {
                     )
                   ])),
         ),
-      )
+      ),
+      Padding(
+          padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 0.0),
+          child: previewImage)
     ]);
   }
 }
