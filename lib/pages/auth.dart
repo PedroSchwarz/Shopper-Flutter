@@ -10,12 +10,23 @@ class AuthPage extends StatefulWidget {
   _AuthPageState createState() => _AuthPageState();
 }
 
-class _AuthPageState extends State<AuthPage> {
+class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
   final GlobalKey<FormState> _formKey = GlobalKey();
   final Map<String, dynamic> _user = {'email': null, 'password': null};
   final TextEditingController _passCtrl = TextEditingController();
+  AnimationController _ctrl;
+  Animation<Offset> _slideAnimation;
 
   AuthMode _authMode = AuthMode.Login;
+
+  @override
+  initState() {
+    super.initState();
+    _ctrl =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 300));
+    _slideAnimation = Tween<Offset>(begin: Offset(1.0, 0.0), end: Offset.zero)
+        .animate(CurvedAnimation(parent: _ctrl, curve: Curves.fastOutSlowIn));
+  }
 
   DecorationImage _buildBackgroundImage() {
     return DecorationImage(
@@ -69,20 +80,26 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   Widget _buildPassConfirmTextField() {
-    return ListTile(
-        title: TextFormField(
-            validator: (String value) {
-              if (_passCtrl.text != value) {
-                return 'Passwords must match';
-              }
-            },
-            obscureText: true,
-            decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white70,
-                border: OutlineInputBorder(),
-                prefixIcon: Icon(Icons.lock),
-                labelText: 'Confirm password')));
+    return FadeTransition(
+      opacity: CurvedAnimation(parent: _ctrl, curve: Curves.easeIn),
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: ListTile(
+            title: TextFormField(
+                validator: (String value) {
+                  if (_passCtrl.text != value && _authMode == AuthMode.Signup) {
+                    return 'Passwords must match';
+                  }
+                },
+                obscureText: true,
+                decoration: InputDecoration(
+                    filled: true,
+                    fillColor: Colors.white70,
+                    border: OutlineInputBorder(),
+                    prefixIcon: Icon(Icons.lock),
+                    labelText: 'Confirm password'))),
+      ),
+    );
   }
 
   void _submitForm(Function authenticate) async {
@@ -122,17 +139,21 @@ class _AuthPageState extends State<AuthPage> {
                         child: Column(children: <Widget>[
                           _buildEmailTextField(),
                           _buildPassTextField(),
-                          _authMode == AuthMode.Signup
-                              ? _buildPassConfirmTextField()
-                              : Container(),
+                          _buildPassConfirmTextField(),
                           ListTile(
                               title: RaisedButton(
                                   onPressed: () {
-                                    setState(() {
-                                      _authMode = _authMode == AuthMode.Login
-                                          ? AuthMode.Signup
-                                          : AuthMode.Login;
-                                    });
+                                    if (_authMode == AuthMode.Login) {
+                                      setState(() {
+                                        _authMode = AuthMode.Signup;
+                                      });
+                                      _ctrl.forward();
+                                    } else {
+                                      setState(() {
+                                        _authMode = AuthMode.Login;
+                                      });
+                                      _ctrl.reverse();
+                                    }
                                   },
                                   color: Colors.white,
                                   textColor: Theme.of(context).accentColor,

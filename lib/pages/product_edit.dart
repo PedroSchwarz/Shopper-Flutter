@@ -122,21 +122,15 @@ class _ProductEditPageState extends State<ProductEditPage> {
       return Scaffold(
           appBar: AppBar(title: Text('Edit ${product.title}')),
           body: Form(
-            key: _formKey,
-            child: ListView(
-              children: <Widget>[
+              key: _formKey,
+              child: ListView(children: <Widget>[
                 _buildTitleTextField(product.title),
                 _buildDescTextField(product.description),
                 _buildPriceTextField(product.price),
 //          LocationInput(_setLocation, product),
                 ImageInput(_setImage, product: product),
-                Padding(
-                  padding: const EdgeInsets.only(top: 16.0),
-                  child: ListTile(title: _buildSubmitButton(context)),
-                )
-              ],
-            ),
-          ));
+                ListTile(title: _buildSubmitButton(context)),
+              ])));
     });
   }
 }

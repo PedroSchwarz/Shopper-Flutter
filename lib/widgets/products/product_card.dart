@@ -43,19 +43,21 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
         child: Column(children: <Widget>[
-      FadeInImage(
-          placeholder: AssetImage('assets/food.jpg'),
-          image: NetworkImage(product.imageUrl),
-          fit: BoxFit.cover,
-          height: 300,
-          width: MediaQuery.of(context).size.width),
+      Hero(
+        tag: product.id,
+        child: FadeInImage(
+            placeholder: AssetImage('assets/food.jpg'),
+            image: NetworkImage(product.imageUrl),
+            fit: BoxFit.cover,
+            height: 300,
+            width: MediaQuery.of(context).size.width),
+      ),
       _buildTitlePriceRow(),
       Padding(
         padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 25.0),
         child: Divider(height: 2.0),
       ),
       Text('Union Square, San Francisco'),
-      Text(product.userEmail),
       _buildActionButtons(context)
     ]));
   }
