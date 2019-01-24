@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
 import 'package:scoped_model/scoped_model.dart';
 
 import '../widgets/products/price_tag.dart';

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'dart:io';
 
 import 'package:scoped_model/scoped_model.dart';
 
 import '../widgets/form_inputs/location.dart';
 import '../widgets/form_inputs/image.dart';
+import '../widgets/ui_elements/adaptive_progress_indicator.dart';
 
 import '../models/LocationData.dart';
 
@@ -69,7 +71,7 @@ class _ProductCreatePageState extends State<ProductCreatePage> {
     return ScopedModelDescendant<MainModel>(
         builder: (BuildContext context, Widget child, MainModel model) {
       return model.isLoading
-          ? Center(child: CircularProgressIndicator())
+          ? Center(child: AdaptiveProgressIndicator())
           : RaisedButton(
               onPressed: () => _submitForm(model.addProduct),
               child: Text('SAVE'),

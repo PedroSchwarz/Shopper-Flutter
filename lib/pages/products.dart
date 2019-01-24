@@ -3,6 +3,7 @@ import 'package:scoped_model/scoped_model.dart';
 
 import '../widgets/products/products.dart';
 import '../widgets/ui_elements/logout_list_tile.dart';
+import '../widgets/ui_elements/adaptive_progress_indicator.dart';
 
 import '../scoped_models/main.dart';
 
@@ -45,7 +46,7 @@ class _ProductsPageState extends State<ProductsPage> {
       if (model.displayedProducts.length > 0 && !model.isLoading) {
         content = Products();
       } else if (model.isLoading) {
-        content = Center(child: CircularProgressIndicator());
+        content = Center(child: AdaptiveProgressIndicator());
       }
       return RefreshIndicator(child: content, onRefresh: model.fetchProducts);
     });

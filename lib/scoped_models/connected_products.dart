@@ -140,7 +140,7 @@ mixin ProductsModel on ConnectedProductsModel {
       'userEmail': currentProduct.userEmail
     };
     try {
-      final http.Response res = await http.put(
+      await http.put(
           'https://shopper-flutter-41f06.firebaseio.com/products/$id.json?auth=${_authenticatedUser.token}',
           body: json.encode(updatedData));
       _isLoading = false;
@@ -168,7 +168,7 @@ mixin ProductsModel on ConnectedProductsModel {
     final int deletedProductIndex =
         _products.indexWhere((product) => product.id == id);
     try {
-      final http.Response res = await http.delete(
+      await http.delete(
           'https://shopper-flutter-41f06.firebaseio.com/products/$id.json?auth=${_authenticatedUser.token}');
       _products.removeAt(deletedProductIndex);
       notifyListeners();

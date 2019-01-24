@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:scoped_model/scoped_model.dart';
 
+import '../widgets/ui_elements/adaptive_progress_indicator.dart';
+
 import '../models/Auth.dart';
 
 import '../scoped_models/main.dart';
@@ -163,7 +165,7 @@ class _AuthPageState extends State<AuthPage> with TickerProviderStateMixin {
                               builder: (BuildContext context, Widget child,
                                   MainModel model) {
                             return model.isLoading
-                                ? Center(child: CircularProgressIndicator())
+                                ? Center(child: AdaptiveProgressIndicator())
                                 : RaisedButton(
                                     onPressed: () =>
                                         _submitForm(model.authenticate),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+
 import 'package:scoped_model/scoped_model.dart';
 //import 'package:map_view/map_view.dart';
 
@@ -10,8 +11,10 @@ import './pages/product_edit.dart';
 
 import './scoped_models/main.dart';
 
+import './helpers/global_config.dart';
+
 void main() {
-//  MapView.setApiKey("AIzaSyDLEA0qtBHOyXYr9-EdnWVExivlCI1uyD0");
+//  MapView.setApiKey(apiKey);
   runApp(MyApp());
 }
 
@@ -46,7 +49,6 @@ class _MyAppState extends State<MyApp> {
               accentColor: Colors.deepPurple,
               buttonColor: Colors.deepPurple),
           debugShowCheckedModeBanner: false,
-//      home: AuthPage(),
           routes: {
             '/': (BuildContext context) =>
                 !_isAuthenticated ? AuthPage() : ProductsPage(_model),

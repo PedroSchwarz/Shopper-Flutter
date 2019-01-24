@@ -7,6 +7,8 @@ import 'package:http/http.dart' as http;
 import '../../models/Product.dart';
 import '../../models/LocationData.dart';
 
+import '../../helpers/global_config.dart';
+
 class LocationInput extends StatefulWidget {
 //  final Function setLocation;
 //  final Product product;
@@ -48,7 +50,7 @@ class _LocationInputState extends State<LocationInput> {
 //      });
 //    }
 //    final Uri uri = Uri.https('maps.googleapis.com', '/maps/api/geocode/json',
-//        {'address': address, 'key': "AIzaSyDLEA0qtBHOyXYr9-EdnWVExivlCI1uyD0"});
+//        {'address': address, 'key': apiKey});
 //    final http.Response res = await http.get(uri);
 //    final resData = json.decode(res.body);
 //    final formattedAddress = resData['results'][0]['formatted_address'];
@@ -58,7 +60,7 @@ class _LocationInputState extends State<LocationInput> {
 //        longitude: coords['lng'],
 //        address: formattedAddress);
 //    final StaticMapProvider staticMapProvider =
-//    StaticMapProvider("AIzaSyDLEA0qtBHOyXYr9-EdnWVExivlCI1uyD0");
+//    StaticMapProvider(apiKey);
 //    final Uri staticMapUri = staticMapProvider.getStaticUriWithMarkers(
 //        [Marker('position', 'Position', _locationData.latitude, _locationData.longitude)],
 //        center: Location(_locationData.latitude, _locationData.longitude)),
