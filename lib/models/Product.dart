@@ -10,6 +10,7 @@ class Product {
   final bool isFavorite;
   final String userId;
   final String userEmail;
+  final Map<String, dynamic> wishlistUsers;
 
   Product(
       {@required this.id,
@@ -20,5 +21,6 @@ class Product {
       @required this.imagePath,
       @required this.userId,
       @required this.userEmail,
-      this.isFavorite = false});
+      this.isFavorite = false,
+      this.wishlistUsers});
 }

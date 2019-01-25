@@ -137,7 +137,8 @@ mixin ProductsModel on ConnectedProductsModel {
       'imageUrl': imageUrl,
       'imagePath': imagePath,
       'userId': currentProduct.userId,
-      'userEmail': currentProduct.userEmail
+      'userEmail': currentProduct.userEmail,
+      'wishlistUsers': currentProduct.wishlistUsers
     };
     try {
       await http.put(
@@ -152,6 +153,7 @@ mixin ProductsModel on ConnectedProductsModel {
           imageUrl: imageUrl,
           imagePath: imagePath,
           isFavorite: currentProduct.isFavorite,
+          wishlistUsers: currentProduct.wishlistUsers,
           userId: currentProduct.userId,
           userEmail: currentProduct.userEmail);
       _products[currentProductIndex] = updatedProduct;
@@ -206,7 +208,8 @@ mixin ProductsModel on ConnectedProductsModel {
             isFavorite: productData['wishlistUsers'] == null
                 ? false
                 : (productData['wishlistUsers'] as Map<String, dynamic>)
-                    .containsKey(_authenticatedUser.id));
+                    .containsKey(_authenticatedUser.id),
+            wishlistUsers: productData['wishlistUsers']);
         products.add(product);
       });
       _products = onlyForUser
